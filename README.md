@@ -1,5 +1,6 @@
 # Webex-Teams-Space-Archive-v2
 Archive Cisco Webex Teams Space messages to a single HTML file. It is based on the older [Webex Teams Space archiver](https://github.com/DJF3/Webex-Teams-Space-Archive). Given the major updates I published it in *this* repository. You can use one or the other. 
+NOTE: This code was written for a customer as an example. It's not beautiful code but it works :-)
 
 ![Example](/webexteams-archive-screenshot.jpg)
 
