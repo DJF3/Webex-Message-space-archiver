@@ -1,7 +1,7 @@
 # Webex-Teams-Space-Archive-v2
 Archive Cisco Webex Teams Space messages to a single HTML file. It is based on the older [Webex Teams Space archiver](https://github.com/DJF3/Webex-Teams-Space-Archive). Given the major updates I published it in *this* repository. You can use one or the other. 
 
-![Example](/README.md_screenshot.jpg)
+![Example](/webexteams-archive-screenshot.jpg)
 
 # REQUIREMENTS
 * A (free) [Webex Teams](https://www.webex.com/team-collaboration.html) account
@@ -93,26 +93,26 @@ Sorting of archived messages.
 
 
 # Roadmap
-**FILE**: add date in generated html filename?
-**THIS TOOL**: make it web-based
-   * Login using Webex Teams
-   * Select room to archive
-   * Room messages are exported to an HTML file
-   * User receives 1:1 message from tool bot with the HTML file attached
-~~DATE: display in different color (easier to scan for specific day)~~
-~~DATE: include 'day-of-week'? i.e. "monday, february 2 2016"~~
-~~DATE: use local Date format settings? (yyyy/mm/dd vs. dd-mm-yyyy)~~
-~~DISPLAY: reverse order of messages, from old to new?~~
-~~ATTACHMENTS: attached? show file names~~
-~~ATTACHMENTS: download?~~
-~~MESSAGES: support markup text~~
-~~MESSAGES: support retrieving >1000 messages~~
-~~MAX: Allow configuration of maximum number of messages~~
-~~RUN: display detailed progress when running~~
-~~DISPLAY: Hover over user name to see the email address~~
-~~DISPLAY: Avatar, configurable.~~
-~~TECH: Deal with rate-limiting~~
-~~DISPLAY: images: click to zoom in or out~~
+* **FILE**: add date in generated html filename?
+* **WEB**: make this script web-based
+   * Login using Webex Teams (oAuth)
+   * Select space to archive
+   * Space messages are exported to an HTML file
+   * User receives 1:1 message from a Bot with the HTML file attached
+* ~~DATE: display in different color (easier to scan for specific day)~~
+* ~~DATE: include 'day-of-week'? i.e. "monday, february 2 2016"~~
+* ~~DATE: use local Date format settings? (yyyy/mm/dd vs. dd-mm-yyyy)~~
+* ~~DISPLAY: reverse order of messages, from old to new?~~
+* ~~ATTACHMENTS: attached? show file names~~
+* ~~ATTACHMENTS: download?~~
+* ~~MESSAGES: support markup text~~
+* ~~MESSAGES: support retrieving >1000 messages~~
+* ~~MAX: Allow configuration of maximum number of messages~~
+* ~~RUN: display detailed progress when running~~
+* ~~DISPLAY: Hover over user name to see the email address~~
+* ~~DISPLAY: Avatar, configurable.~~
+* ~~TECH: Deal with rate-limiting~~
+* ~~DISPLAY: images: click to zoom in or out~~
 
 
 
