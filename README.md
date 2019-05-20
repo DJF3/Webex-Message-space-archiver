@@ -6,7 +6,7 @@ NOTE: This code was written for a customer as an example. I specifically wanted 
 
 # REQUIREMENTS
 * A (free) [Webex Teams](https://www.webex.com/team-collaboration.html) account
-* Python 3.x
+* Python 3.6 or higher
 * Python '[requests](http://docs.python-requests.org/en/master/user/install/#install)' library
 * Be a member of the Webex Teams Space you want to archive
 * Mac: SSL fix (see troubleshooting section at the end)
