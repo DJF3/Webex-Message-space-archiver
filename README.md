@@ -30,10 +30,10 @@ Feedback? Please go [here](#feedback) and let me know what you think!
 
 
 <a name="start"/>
+
 # Features
 
 ### DOES:
-
 * Archive all messages in a space
 * Find space ID with built in search function
 * Download space images, files or both
@@ -51,7 +51,6 @@ Feedback? Please go [here](#feedback) and let me know what you think!
 
 
 ### DOESN'T:
-
 * Clean your dishes
 * ~~*Download* user avatar files~~
 
@@ -63,6 +62,7 @@ Feedback? Please go [here](#feedback) and let me know what you think!
 
 
 <a name="start"/>
+
 # Start
 
 1. Run the script to create the configuration file "webexteamsarchive-config.ini" (if it does not exist)
@@ -76,6 +76,7 @@ Feedback? Please go [here](#feedback) and let me know what you think!
 
 
 <a name="configuration"/>
+
 # Configuration
 Edit the following variables in the python file:
 
@@ -147,13 +148,16 @@ If you don't see the RUN button, make sure 'test mode' is turned on (top of page
 
 
 <a name="troubleshooting"/>
+
 # Troubleshooting
 Most of the errors should be handles by the script.
 * **SSL Issue**: On a Mac: the default SSL is outdated & unsupported. Check out the *readme.rtf* in your Python Application folder. That folder also contains a "Install certificates.command" which should do the work for you.
 
 
 <a name="releasenotes"/>
+
 # Release Notes
+
 ## Enhancements in release v17h-v19
 - TIME: Messages are stored in UTC. Your timezone is detected and time/dates are converted  (v18b9)
 - FILES: HTML files are always stored in a folder.       (v18b)
@@ -221,6 +225,7 @@ Most of the errors should be handles by the script.
 
 
 <a name="roadmap"/>
+
 # Roadmap
 * WEB: make this script web-based
    * Login using Webex Teams (oAuth)
@@ -230,5 +235,6 @@ Most of the errors should be handles by the script.
 
 
 <a name="feedback"/>
+
 # Feedback & Support
 Please click this link and [enter your feedback](https://tools.sparkintegration.club/forms/joinspace/jv4kauin9bm7cs01va5vhosi3jro6a/) in the text field. If you want me to respond let me know in your message and enter your real email address.
