@@ -2,7 +2,7 @@
 Archive Cisco Webex Teams Space messages to a single HTML file. It is based on the older [Webex Teams Space archiver](https://github.com/DJF3/Webex-Teams-Space-Archive). Given the major updates I published it in *this* repository. You can use one or the other. 
 NOTE: This code was written for a customer as an example. I specifically wanted 1 (one) .py file that did everything. It's not beautiful code but it works :-)
 
-<img src="https://raw.githubusercontent.com/DJF3/Webex-Teams-Space-Archive-v2/master/webexteams-archive-screenshot.jpg" width="400px">height="whatever"
+<img src="https://raw.githubusercontent.com/DJF3/Webex-Teams-Space-Archive-v2/master/webexteams-archive-screenshot.jpg" width="400px">
 
 # REQUIREMENTS
 * A (free) [Webex Teams](https://www.webex.com/team-collaboration.html) account
