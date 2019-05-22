@@ -1,3 +1,4 @@
+_MAJOR UPDATE - MAJOR UPDATE - MAJOR UPDATE _
 
 [Features](#features)
 
@@ -199,6 +200,7 @@ Most of the errors should be handles by the script.
 
 
 ## Bugs Fixed in release v17h-v19
+- DOWNLOAD: could cause a KeyError: 'content-disposition'. Code now deals with this situation.   (v18b9)
 - HTML: code still contained: <spark-mention> tags - they do nothing - removed.   (v18b9)
 - AVATAR: step 4 had a wrong reference to members.personId that should have been members['personId']   (v18b5)
 - AVATAR: Display user avatar+msg when the same user writes a msg >60 seconds after the prev message   (v18b4)
