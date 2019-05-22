@@ -1,4 +1,5 @@
 *MAJOR UPDATE v19 - MAJOR UPDATE v19 - MAJOR UPDATE v19*
+_MAJOR UPDATE - MAJOR UPDATE - MAJOR UPDATE _
 
 [Features](#features)
 
@@ -160,6 +161,7 @@ Most of the errors should be handles by the script.
 # Release Notes
 
 ## Enhancements in release v17h-v19
+
 - TIME: Messages are stored in UTC. Your timezone is detected and time/dates are converted  (v18b9)
 - FILES: HTML files are always stored in a folder.       (v18b)
 - FILES: images/files/avatars are stored in their own folder (/images, /files, /avatars)    (v18b)
@@ -173,6 +175,7 @@ Most of the errors should be handles by the script.
 
 
 ## Minor enhancements in release v17h-v19
+
 - TIME: add time-zone detection in script    (v18b9)
 - TIME: add 'generation' time-zone to header    (v18b9)
 - REQUIREMENT: for Python 3.6 or higher is checked (because of print(f"{blah}"))   (v18b8)
@@ -182,6 +185,7 @@ Most of the errors should be handles by the script.
 - PERFORMANCE: report displayed based on variable printPerformanceReport=False in script  (v18b7)
 - NAVIGATE: add floating "back to top" button   (v18b3)
 - STATS: When not downloading files, it will provide stats for files AND images. (v18b3)
+- NOTIFY: spaceId not set: explain what they can do: run with search parameter!   (v19)
 - NOTIFY: When the script is ready, it beeps once    (v18b3)
 - FOLDERS: will be created AFTER messages/members have been retrieved. ERROR? No folders created.   (v18b8)
 - FOLDER: If a folder exists, it will add a number '-01', '-02' instead of '-1', '-2'    (v18b3)
@@ -200,7 +204,11 @@ Most of the errors should be handles by the script.
 
 
 ## Bugs Fixed in release v17h-v19
+
+- CODE: steps appeared twice: #7, #7, #8. NOW have #7, #8, #9   (v19)
+- SEARCH: if you haven't set your space ID, the search function doesn't work!    (v19)
 - DOWNLOAD: could cause a KeyError: 'content-disposition'. Code now deals with this situation.   (v18b9)
+- HTML: header height wrong (66px) - changed to 76px because of 2nd line with space info    (v19)
 - HTML: code still contained: <spark-mention> tags - they do nothing - removed.   (v18b9)
 - AVATAR: step 4 had a wrong reference to members.personId that should have been members['personId']   (v18b5)
 - AVATAR: Display user avatar+msg when the same user writes a msg >60 seconds after the prev message   (v18b4)
