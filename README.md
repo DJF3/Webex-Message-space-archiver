@@ -1,4 +1,4 @@
-_MAJOR UPDATE - MAJOR UPDATE - MAJOR UPDATE _
+*MAJOR UPDATE v19 - MAJOR UPDATE v19 - MAJOR UPDATE v19*
 
 [Features](#features)
 
@@ -175,7 +175,7 @@ Most of the errors should be handles by the script.
 ## Minor enhancements in release v17h-v19
 - TIME: add time-zone detection in script    (v18b9)
 - TIME: add 'generation' time-zone to header    (v18b9)
-- REQUIREMENT: for Python 3.6 ir higher is checked because of print(f"{blah}")   (v18b8)
+- REQUIREMENT: for Python 3.6 or higher is checked (because of print(f"{blah}"))   (v18b8)
 - FONT: easier to read: removed: HelveticaNeue-Light/Helvetica Neue Light from CSS    (v18b9)
 - ERROR: print certain errors when the script finishes (toggle: by setting in the script)   (v18b8)
 - PRIVACY: change filename for avatars to userId   (v18b8)
