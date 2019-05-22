@@ -30,7 +30,7 @@ import string
 from pathlib import Path
 import configparser
 try:
-    assert sys.version_info >= (3, 6)
+    assert sys.version_info[0:2] >= (3, 6)
 except:
     print("\n\n **ERROR** Minimum Python version is 3.6. Please visit this site to\n           install a newer Python version: https://www.python.org/downloads/ \n\n")
     exit()
@@ -170,8 +170,8 @@ if not sortOldNew in ['yes', 'no']:
     sortOldNew = "yes"
 if not myToken or len(myToken) < 55:
     goExitError += "\n   **ERROR** your token is not set or not long enough"
-if not myRoom or len(myRoom) < 70:
-    goExitError += "\n   **ERROR** your space ID is not set or not long enough"
+if not myRoom and len(sys.argv) < 1 or len(myRoom) < 70 and len(sys.argv) < 1:
+    goExitError += "\n   **ERROR** your space ID is not set or not long enough\n    RUN this script with a search parameter (space name) to find your space ID"
 if not outputFileName or len(outputFileName) < 2:
     outputFileName = ""
 if not userAvatar in ['no', 'link', 'download']:
@@ -201,7 +201,7 @@ htmlheader = """<!DOCTYPE html><html><head><meta charset="utf-8"/><style media='
 body { font-family: 'HelveticaNeue', 'Helvetica Neue', 'Helvetica', 'Arial', 'Lucida Grande', 'sans-serif';
 }
 .cssRoomName {
-    height: 66px;
+    height: 76px;
     background-color: #029EDB;
     font-size: 34px;
     color: #fff;
@@ -995,9 +995,8 @@ TimezoneName = str(time.tzname)
 # Write ALL JSON to a FILE to be used as input (not putting load on Webex Teams APIs)
 startTimer()
 if outputToJson == "yes" or outputToJson == "both" or outputToJson == "json":
-    if inputFileName == "":
-        with open(myAttachmentFolder + "/" + outputFileName + ".json", 'w', encoding='utf-8') as f:
-            json.dump(WebexTeamsMessages, f)
+    with open(myAttachmentFolder + "/" + outputFileName + ".json", 'w', encoding='utf-8') as f:
+        json.dump(WebexTeamsMessages, f)
 stopTimer("output to json")
 
 
@@ -1239,7 +1238,7 @@ imagepopuphtml = """      <div id="modal01" class="image-modal" onclick="this.st
 htmlfooter = "<br><br><div class='cssNewMonth' id='endoffile'> end of file &nbsp;&nbsp;<span style='float:right; font-size:16px; margin-right:15px; padding-top:24px;'><a href='#top'>back to top</a></span></div><br><br>"
 
 # ======  PUT EVERYTHING TOGETHER
-print("\n #7 ----- Finalizing HTML")
+print("\n #8 ----- Finalizing HTML")
 htmldata = htmlheader + newtocList + htmldata + htmlfooter + imagepopuphtml + "</body></html>"
 stopTimer("toc,domainstats,header,footer + combining")
 
@@ -1249,7 +1248,7 @@ stopTimer("toc,domainstats,header,footer + combining")
 startTimer()
 with open(myAttachmentFolder + "/" + outputFileName + ".html", 'w', encoding='utf-8') as f:
     print(htmldata, file=f)
-print(" #8 ------------------------- ready -------------------------\n\n")
+print(" #9 ------------------------- ready -------------------------\n\n")
 beep(1)
 stopTimer("write html to file")
 
