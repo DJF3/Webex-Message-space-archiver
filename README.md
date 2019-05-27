@@ -51,17 +51,15 @@ How-to & Demo: https://youtu.be/gula_Hxh2ms
 * Display: quoted or formatted text
 * Display: external users in different color (users with other domain)
 * Display: images in popup when clicked
-
+* Print: just like it appears on the screen
 
 ### DOESN'T:
 * Clean your dishes
-* ~~*Download* user avatar files~~
-
 
 ### NOTE:
 
 * The message TIME **displayed** is in the UTC timezone. The timezone on your device defines how this UTC time/date is displayed. A message send at 12:43 CEST is stored as 10:43 UTC. When you change your timezone to PDT (UTC-7) it will be displayed as 03:43.
-
+* When printing the generated HTML file in Firefox: File, Print, check "print background colors and images", then print or save to PDF
 
 
 <a name="start"/>
@@ -161,8 +159,27 @@ Most of the errors should be handles by the script.
 
 # Release Notes
 
-## Enhancements in release v17h-v19
+## Enhancements in release v19a - May 27th 2019
+**IMPORTANT**
+- PRINT: A printed (to PDF) version of the generated file looks like the screen    (27may2019-v19a)
+         *Firefox* tip: File, Print, check "print background colors and images", then print/save to PDF
+         
+**NEW**
+- STATISTICS: add number of different users who have written messages   (24may2019-v19a)
+- STATISTICS: add total number of members   (24may2019-v19a)
+- ERROR: Avatar download errors are not reported if retries were successful   (22may2019-v19a)
 
+**BUG**
+- LAYOUT: Header is not resizing with browser width: better lay-out/print    (27may2019-v19a)
+- LAYOUT: TOC + statistics now have a minimum size: better lay-out/print    (27may2019-v19a)
+- PRINT: removed "back to top" arrow from printing    (27may2019-v19a)
+- HEADER: 'avatar' setting missing    (27may2019-v19a)
+- BUG: remove "back to top" text from month headers?   (27may2019-v19a)
+
+
+
+## Enhancements in release v17h-v19 - May 22nd 2019
+**IMPORTANT**
 - TIME: Messages are stored in UTC. Your timezone is detected and time/dates are converted  (v18b9)
 - FILES: HTML files are always stored in a folder.       (v18b)
 - FILES: images/files/avatars are stored in their own folder (/images, /files, /avatars)    (v18b)
@@ -174,9 +191,7 @@ Most of the errors should be handles by the script.
 - AVATAR: empty? Show circle with first 2 initials    (v17h)
 - FIND SPACE ID: Find space ID by running the script with a search argument as parameter. (v17h)
 
-
-## Minor enhancements in release v17h-v19
-
+**NEW**
 - TIME: add time-zone detection in script    (v18b9)
 - TIME: add 'generation' time-zone to header    (v18b9)
 - REQUIREMENT: for Python 3.6 or higher is checked (because of print(f"{blah}"))   (v18b8)
@@ -202,10 +217,7 @@ Most of the errors should be handles by the script.
 - IMAGES: Decreased space between multiple images in the same message    (v18b3)
 - IMAGES: Image popup: added "escape" key to close the image    (v17h)
 
-
-
-## Bugs Fixed in release v17h-v19
-
+**BUG**
 - CODE: steps appeared twice: #7, #7, #8. NOW have #7, #8, #9   (v19)
 - SEARCH: if you haven't set your space ID, the search function doesn't work!    (v19)
 - DOWNLOAD: could cause a KeyError: 'content-disposition'. Code now deals with this situation.   (v18b9)
@@ -233,13 +245,13 @@ Most of the errors should be handles by the script.
 
 ## Limitations in v19
 * If _HTML code_ is written as TEXT (without marking it as code using  ```), the message may not be displayed or it could mess up the lay-out for remaining messages
-* PRINTing the HTML page to PDF (for example) will mess up lay-out (fixed in v0.19a)
+* ~~PRINTing the HTML page to PDF (for example) will mess up lay-out (fixed in v0.19a)~~
 
 
 <a name="roadmap"/>
 
 # Roadmap
-* PRINT: update lay-out so printing works great (version 0.19a)
+~~* PRINT: update lay-out so printing works great (version 0.19a)~~
 * WEB: make this script web-based
    * Login using Webex Teams (oAuth)
    * Select space to archive
