@@ -233,11 +233,13 @@ Most of the errors should be handles by the script.
 
 ## Limitations in v19
 * If _HTML code_ is written as TEXT (without marking it as code using  ```), the message may not be displayed or it could mess up the lay-out for remaining messages
+* PRINTing the HTML page to PDF (for example) will mess up lay-out (fixed in v0.19a)
 
 
 <a name="roadmap"/>
 
 # Roadmap
+* PRINT: update lay-out so printing works great (version 0.19a)
 * WEB: make this script web-based
    * Login using Webex Teams (oAuth)
    * Select space to archive
