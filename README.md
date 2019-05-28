@@ -251,6 +251,7 @@ Most of the errors should be handles by the script.
 <a name="roadmap"/>
 
 # Roadmap
+* LAYOUT: more images in a single message displayed left to right instead of below each other. + first show files, then images. (version 0.19b)
 ~~* PRINT: update lay-out so printing works great (version 0.19a)~~
 * WEB: make this script web-based
    * Login using Webex Teams (oAuth)
