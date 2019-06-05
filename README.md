@@ -148,14 +148,14 @@ If you don't see the RUN button, make sure 'test mode' is turned on (top of page
 
 
 
-<a name="troubleshooting"/>
+<a name="troubleshooting"></a>
 
 # Troubleshooting
 Most of the errors should be handles by the script.
 * **SSL Issue**: On a Mac: the default SSL is outdated & unsupported. Check out the *readme.rtf* in your Python Application folder. That folder also contains a "Install certificates.command" which should do the work for you.
 
 
-<a name="releasenotes"/>
+<a name="releasenotes"></a>
 
 # Release Notes
 
