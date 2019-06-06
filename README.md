@@ -55,6 +55,8 @@ Feedback? Please go [here](#feedback) and let me know what you think!
 
 ### DOESN'T:
 * Clean your dishes
+* Download whiteboards (unless you post a snapshot)
+* Download/display files shared in external Enterprise Content Management systems (Onedrive/Sharepoint)
 
 ### NOTE:
 
