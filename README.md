@@ -32,7 +32,7 @@ Feedback? Please go [here](#feedback) and let me know what you think!
 * Mac: SSL fix (see [troubleshooting](#troubleshooting) section at the end)
 
 
-<a name="start"/>
+<a name="features"/>
 
 # Features
 
