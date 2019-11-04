@@ -171,7 +171,7 @@ Most of the errors should be handles by the script.
 - STATISTICS: add total number of members   (24may2019-v19a)
 - ERROR: Avatar download errors are not reported if retries were successful   (22may2019-v19a)
 
-**BUG**
+**Fixed bugs**
 - LAYOUT: Header is not resizing with browser width: better lay-out/print    (27may2019-v19a)
 - LAYOUT: TOC + statistics now have a minimum size: better lay-out/print    (27may2019-v19a)
 - PRINT: removed "back to top" arrow from printing    (27may2019-v19a)
@@ -219,7 +219,7 @@ Most of the errors should be handles by the script.
 - IMAGES: Decreased space between multiple images in the same message    (v18b3)
 - IMAGES: Image popup: added "escape" key to close the image    (v17h)
 
-**BUG**
+**Fixed bugs**
 - CODE: steps appeared twice: #7, #7, #8. NOW have #7, #8, #9   (v19)
 - SEARCH: if you haven't set your space ID, the search function doesn't work!    (v19)
 - DOWNLOAD: could cause a KeyError: 'content-disposition'. Code now deals with this situation.   (v18b9)
