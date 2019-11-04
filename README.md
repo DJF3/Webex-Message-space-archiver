@@ -29,7 +29,7 @@ Feedback? Please go [here](#feedback) and let me know what you think!
 * Python 3.6 or higher
 * Python '[requests](http://docs.python-requests.org/en/master/user/install/#install)' library
 * Be a member of the Webex Teams Space you want to archive
-* Mac: SSL fix (see [troubleshooting](#troubleshooting) section at the end)
+* Mac: SSL fix (see [troubleshooting](#troubleshooting) section at the end)  
 
 
 <a name="features"/>
