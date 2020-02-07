@@ -1,4 +1,4 @@
-*x*
+**NOTE: very soon I will release a new version that supports Threaded messages!**
 
 [Features](#features)
 
@@ -15,7 +15,6 @@
 [Feedback & Support](#feedback)
 
 
-**NOTE: very soon I will release a new version that supports Threaded messages!**
 
 # Webex Teams Space Archive NEW
 Archive Cisco Webex Teams Space messages to a single HTML file. It is based on the older [Webex Teams Space archiver](https://github.com/DJF3/Webex-Teams-Space-Archive). Because of the major updates I published it in *this* repository. You can use one or the other.
