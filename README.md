@@ -1,4 +1,4 @@
-**NOTE: very soon I will release a new version that supports Threaded messages!**
+**NOTE: the 0.20 release supports threaded messages!**
 
 [Features](#features)
 
@@ -161,6 +161,39 @@ Most of the errors should be handles by the script.
 <a name="releasenotes"></a>
 
 # Release Notes
+
+## Enhancements in release v20 - February 11th 2020
+**NOTE**
+- Reactions (smiley, thumbs up, etc) are not displayed (info not visible via the API)
+- Spaces with Sharepoint/Onedrive files attached are not shown (info not visible via the API)
+- Space with whiteboards - NOTHING is shown - except if a whiteboard snapshot is posted (PDF)
+
+**NEW**
+- !! MESSAGE THREADING: Supporting message threading !!
+- MESSAGES: Changed message time format so it's easier to read
+- MESSAGES: you can see 'Edited' when a message was modified after sending.
+- MESSAGES: sender color/format different for external users (now just like in the Teams client)
+- LAYOUT: changed left border of threaded message to grey
+- IMAGES: multiple images in 1 message? Now shown as grid, not a list.
+
+**FIXED BUGS**
+- MENTIONS: code would not display "@all" mentions
+- ATTACHMENTS: images with uppercase extensions were not downloaded
+- SORTING: "new->old", all messages considered NEW because current_msg_time - prev_msg_time is never > 60s
+- ATTACHMENTS: 'jpeg' file not recognized as image because it assumed the extension has 3 characters
+- ATTACHMENTS: 'jpeg' images are now embeded (like png/jpg/etc)
+- ATTACHMENTS: messages without text (only attachments/images) --> files won't download
+- THREADED MESSAGE: with threading, the message order is messed up --> now a msg index is created first
+- THREADED MESSAGE: with a # of messages limit, you could run into messages that belong to a previous thread. --> IGNORE those
+- THREADED MESSAGE: threaded messages + avatars should be indented
+- THREADED MESSAGE: When sorted new-old, threaded messages should be sorted old-new
+- THREADED MESSAGE: crossing a month? --> thread reply in Nov on Thread in Oct: showing new month header. --> FIXED
+- THREADED MESSAGE: these messages should have grey bar like ">" before it --> border-left!
+- MESSAGES: When adds the same URL in a msg multiple times it would only appear once
+- INDEX/STATS: index + stats not vertically aligned to top
+- ATTACHMENTS with no name / just spaces as a name cause an error.
+
+
 
 ## Enhancements in release v19a - May 27th 2019
 **IMPORTANT**
