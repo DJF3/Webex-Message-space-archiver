@@ -21,11 +21,10 @@ import datetime
 import urllib.request
 import re
 import time
-import traceback
 import sys
 import os
-import shutil
-import math
+import shutil # for file-download with requests
+import math   # for converting bytes to KB/MB/GB
 import string
 from pathlib import Path
 import configparser
@@ -40,10 +39,11 @@ except ImportError:
     print("\n\n **ERROR** Missing library 'requests'. Please visit the following site to\n           install 'requests': http://docs.python-requests.org/en/master/user/install/ \n\n")
     exit()
 
+
 #--------- DO NOT CHANGE ANYTHING BELOW ---------
 __author__ = "Dirk-Jan Uittenbogaard"
 __email__ = "duittenb@cisco.com"
-__version__ = "0.19"
+__version__ = "0.20"
 __copyright__ = "Copyright (c) 2019 Cisco and/or its affiliates."
 __license__ = "Cisco Sample Code License, Version 1.1"
 sleepTime = 3
@@ -63,7 +63,8 @@ def beep(count): # PLAY SOUND (for errors)
 
 print("\n\n\n #0 ========================= START =========================")
 config = configparser.ConfigParser(allow_no_value=True)
-# --- CHECK if config file exists and if the mandatory settings entries are present.
+# ----------- CONFIG FILE: check if config file exists and if the mandatory settings entries are present.
+# --
 if os.path.isfile("./" + configFile):
     try:
         config.read('./' + configFile)
@@ -73,7 +74,10 @@ if os.path.isfile("./" + configFile):
             downloadFiles = config['Archive Settings']['downloadfiles'].lower().strip()
         else:
             downloadFiles = config['Archive Settings']['download'].lower().strip()
-        sortOldNew = config['Archive Settings']['sortoldnew']
+        if config['Archive Settings']['sortoldnew'] == "yes":
+            sortOldNew = True
+        else:
+            sortOldNew = False
         myToken = config['Archive Settings']['mytoken']
         if config.has_option('Archive Settings', 'myroom'): # Added to deal with old naming in .ini files
             myRoom = config['Archive Settings']['myroom']
@@ -100,7 +104,8 @@ if os.path.isfile("./" + configFile):
         print(" ---------------------------------------\n\n")
         beep(3)
         exit()
-else:  # CREATE config file (when it does not exist)
+else:
+    # ----------- CONFIG FILE: CREATE new config file because it does not exist
     try:
         config = configparser.ConfigParser(allow_no_value=True)
         config.add_section('Archive Settings')
@@ -108,7 +113,7 @@ else:  # CREATE config file (when it does not exist)
         config.set('Archive Settings', 'mytoken', '__YOUR_TOKEN_HERE__')
         config.set('Archive Settings', ';')
         config.set('Archive Settings', '; Space ID: Enter your token above and run this script followed by a search argument')
-        config.set('Archive Settings', ';     "archivescript.py searchstring" - returns lists of spaces containing "searchstring" + space ID')
+        config.set('Archive Settings', ';     "archivescript.py searchstring" - returns lists of spaces matching "searchstring"')
         config.set('Archive Settings', ';     OR: go to https://developer.webex.com/endpoint-rooms-get.html')
         config.set('Archive Settings', ';         "login, API reference, rooms, list all rooms", set "max" to 900 and run ')
         config.set('Archive Settings', 'myspaceid', '__YOUR_SPACE_ID_HERE__')
@@ -141,8 +146,8 @@ else:  # CREATE config file (when it does not exist)
         config.set('Archive Settings', 'outputfilename', '')
         config.set('Archive Settings', ';     ')
         config.set('Archive Settings', ';     ')
-        config.set('Archive Settings', '; Sorting of messages. "yes" (default) means: last message at the bottom,')
-        config.set('Archive Settings', ';      just like in the Webex Teams client. "no" = latest message at the top')
+        config.set('Archive Settings', '; Sorting of messages. "yes" (default) means: newest message at the bottom,')
+        config.set('Archive Settings', ';      just like in the Webex Teams client. "no" = newest message at the top')
         config.set('Archive Settings', 'sortoldnew', 'yes')
         config.set('Archive Settings', ';      ')
         config.set('Archive Settings', ';      ')
@@ -152,6 +157,8 @@ else:  # CREATE config file (when it does not exist)
         config.set('Archive Settings', ';      json     output message data as .json file')
         config.set('Archive Settings', ';      txt      output message data as .txt file')
         config.set('Archive Settings', 'outputjson', 'no')
+        config.set('Archive Settings', ';       ')
+        config.set('Archive Settings', ';       ')
         with open('./' + configFile, 'w') as configfile:
             config.write(configfile)
     except Exception as e:  # Error creating config file
@@ -159,15 +166,15 @@ else:  # CREATE config file (when it does not exist)
         print("             Error message: " + str(e))
         beep(3)
     print("\n\n ------------------------------------------------------------------ \n ** WARNING ** Config file '" + configFile + "' does not exist.  \n               Creating empty configuration file. \n --> EDIT the configuration in this file and re-run this script.\n ------------------------------------------------------------------\n\n")
-    # STOP - the script because you have to update the configuration file first
+    # STOP - the script because you need a valid configuration file first
     exit()
 
-# ----------- CHECK if the configuration VALUES are valid. If not, print error messsage and exit
+# ----------------------------------------------------------------------------------------
+#   CHECK if the configuration VALUES are valid. If not, print error messsage and exit
+# ----------------------------------------------------------------------------------------
 goExitError = "\n\n ------------------------------------------------------------------"
 if not downloadFiles in ['no', 'images', 'files']:
     goExitError += "\n   **ERROR** the 'download' setting must be: 'no', 'images' or 'files'"
-if not sortOldNew in ['yes', 'no']:
-    sortOldNew = "yes"
 if not myToken or len(myToken) < 55:
     goExitError += "\n   **ERROR** your token is not set or not long enough"
 if not myRoom and len(sys.argv) < 1 or len(myRoom) < 70 and len(sys.argv) < 1:
@@ -196,8 +203,10 @@ if len(goExitError) > 76:   # length goExitError = 66. If error: it is > 76 char
     exit()
 
 
-# --- HTML header code containing images, styling info (CSS)
-htmlheader = """<!DOCTYPE html><html><head><meta charset="utf-8"/><style media='screen' type='text/css'>
+# ----------------------------------------------------------------------------------------
+#   HTML header code containing images, styling info (CSS)
+# ----------------------------------------------------------------------------------------
+htmlheader = """<!DOCTYPE html><html><head><meta charset="utf-8"/><style type='text/css'>
 body { font-family: 'HelveticaNeue', 'Helvetica Neue', 'Helvetica', 'Arial', 'Lucida Grande', 'sans-serif';
 }
 .cssRoomName {
@@ -208,32 +217,26 @@ body { font-family: 'HelveticaNeue', 'Helvetica Neue', 'Helvetica', 'Arial', 'Lu
     padding-left: 30px;
     align-items: center;
     padding-top: 8px;
+    min-width: 1000px;
 }
 
-#avatarCircle {
+#avatarCircle,
+.avatarCircle {
     border-radius: 50%;
     width: 31px;
     height: 31px;
     padding: 0px;
     background: #fff;
-    border: 1px solid #DDD;
-    color: #888;
+    /* border: 1px solid #D2D5D6; */
+    color: #000;
     text-align: center;
-    font-size: 20px;
+    font-size: 14px;
     line-height: 30px;
     float: left;
     margin-left: 15px;
+    background-color: #D2D5D6;
 }
 
-.message-avatar {
-    width: 36px;
-    height: 36px;
-    position: relative;
-    overflow: hidden;
-    border-radius: 50%;
-    float: left;
-    margin-left:15px;
-}
 /* paperclip icon for file attachments */
 #fileicon { background-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGlkPSJMYXllcl8xIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA2NCA2NDsiIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDY0IDY0IiB4bWw6c3BhY2U9InByZXNlcnZlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj48c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiMxMzQ1NjM7fQo8L3N0eWxlPjxnPjxnIGlkPSJJY29uLVBhcGVyY2xpcCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTI3LjAwMDAwMCwgMzgwLjAwMDAwMCkiPjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0tMTEwLjMtMzI2Yy0yLjQsMC00LjYtMC45LTYuMy0yLjZjLTEuNy0xLjctMi42LTMuOS0yLjYtNi4zYzAtMi40LDAuOS00LjYsMi42LTYuM2wyNS40LTI1LjQgICAgIGM0LjYtNC42LDEyLjItNC42LDE2LjgsMGMyLjIsMi4yLDMuNSw1LjIsMy41LDguNGMwLDMuMi0xLjIsNi4xLTMuNSw4LjRsLTE5LDE5bC0yLTJsMTktMTljMy41LTMuNSwzLjUtOS4zLDAtMTIuOCAgICAgYy0zLjUtMy41LTkuMy0zLjUtMTIuOCwwbC0yNS40LDI1LjRjLTEuMiwxLjEtMS44LDIuNy0xLjgsNC4zYzAsMS42LDAuNiwzLjIsMS44LDQuM2MyLjQsMi40LDYuMiwyLjQsOC42LDBsMTktMTkgICAgIGMxLjItMS4yLDEuMi0zLjIsMC00LjRjLTEuMi0xLjItMy4yLTEuMi00LjQsMGwtMTIuNywxMi43bC0yLTJsMTIuNy0xMi43YzIuMy0yLjMsNi0yLjMsOC4zLDBjMi4zLDIuMywyLjMsNiwwLDguM2wtMTksMTkgICAgIEMtMTA1LjctMzI2LjktMTA3LjktMzI2LTExMC4zLTMyNiIgaWQ9IkZpbGwtNjAiLz48L2c+PC9nPjwvc3ZnPg==');
     display: block;
@@ -271,6 +274,7 @@ body { font-family: 'HelveticaNeue', 'Helvetica Neue', 'Helvetica', 'Arial', 'Lu
     font-size: 13px;
     padding-left: 50px;
     line-height: 14px;
+    display: inline-block;
 }
 /*  ---- MESSAGE TEXT  ----- */
 .css_messagetext {
@@ -279,13 +283,13 @@ body { font-family: 'HelveticaNeue', 'Helvetica Neue', 'Helvetica', 'Arial', 'Lu
     font-weight: 400;
     margin-bottom: 20px;
     margin-top: 6px;
-    margin-left: 20px;
-    padding-bottom: 8px;
+    margin-left: 55px;
+    padding-bottom: 18px;
 }
+
 /*  ---- MESSAGE TEXT IMAGES ----- */
 .css_messagetext img {
     margin-top: 10px;
-    padding-left: 50px;
     max-width: 700px;
     max-height: 100px;
     cursor: pointer;
@@ -300,15 +304,26 @@ body { font-family: 'HelveticaNeue', 'Helvetica Neue', 'Helvetica', 'Arial', 'Lu
     border-radius: 8px;
 }
 .css_message {
-    margin-left: 50px;
+    margin-left: 10px;
 }
+.css_message_thread {
+    border-left: 4px solid #dadada;
+    margin-left: 80px;
+    padding-left: 00px;
+    margin-top: -20px;
+}
+
 #myheader
 #myheader table,
 #myheader td,
 #myheader tbody {
     width: 900px;
     vertical-align: top;
-    padding-left: 30px;
+    padding-left: 10px;
+    min-width: 120px;
+}
+#myheader td {
+    vertical-align: top;
 }
 /* to fix HTML code used in text messages */
 #myheader tr {
@@ -319,6 +334,7 @@ body { font-family: 'HelveticaNeue', 'Helvetica Neue', 'Helvetica', 'Arial', 'Lu
 #mytoc tbody {
     width: 150px !important;
     vertical-align: top !important;
+    min-width: 150px;
 }
 /* IMAGE POPUP */
 .image-animate-zoom {
@@ -381,6 +397,16 @@ body { font-family: 'HelveticaNeue', 'Helvetica Neue', 'Helvetica', 'Arial', 'Lu
     max-width: 90%;
     max-height: 90%;
 }
+.filesize {
+    display: inline-block;
+    color: #b3afaf;
+}
+.css_imagetext {
+    display: inline-block;
+    color: #8e8e8e;
+    font-size: 12px;
+    padding-left: 20px;
+}
 .tooltip .tooltiptext {
   visibility: hidden;
   background-color: lightgray;
@@ -414,31 +440,40 @@ body { font-family: 'HelveticaNeue', 'Helvetica Neue', 'Helvetica', 'Arial', 'Lu
 /* For quotes */
 blockquote {
     font-size: 16px;
-    display: inline-block;
+    /* display: inline-block; */
     text-align: left;
     color: #000;
     word-wrap: break-word;
     white-space: pre-wrap;
     width: 95%;
-    border-left: 4px solid #999;
+    border-left: 4px solid #dadada;
     margin: 1em 0 1em .5em;
     padding-left: 30px
 }
 /* SCROLL TO TOP button */
-#myBtn {
-  display: none;
-  position: fixed;
-  bottom: 20px;
-  right: 30px;
-  z-index: 99;
-  font-size: 18px;
-  border: none;
-  outline: none;
-  background-color: red;
-  color: white;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 2px;
+@media screen {
+   #myBtn {
+     display: none;
+     position: fixed;
+     bottom: 20px;
+     right: 30px;
+     z-index: 99;
+     font-size: 18px;
+     border: none;
+     outline: none;
+     background-color: red;
+     color: white;
+     cursor: pointer;
+     padding: 8px;
+     border-radius: 2px;
+   }
+}
+/* Hiding 'back to top' button from printed page */
+@media print {
+   #myBtn {
+     display: none !important;
+     position: fixed;
+  }
 }
 #myBtn:hover {
   background-color: #555;
@@ -447,6 +482,12 @@ blockquote {
 </head><body><div id='top'></div><button onclick="topFunction()" id="myBtn" title="Go to top">&uarr;</button>
 """
 
+# ----------------------------------------------------------------------------------------
+#   FUNCTIONS
+# ----------------------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------------------
 # FUNCTION calculates the difference between your local timezone and UTC.
 #          Webex teams messages are stored with a UTC date. With this information
 #          we can update the UTC dates from messages to your local timezone dates.
@@ -454,27 +495,24 @@ def timeDeltaWithUTC():
     dateNOW = datetime.datetime.now()       # your current time
     dateUTC = datetime.datetime.utcnow()    # the  current UTC time (used for Teams messages)
     if dateNOW > dateUTC:   # On a map you're RIGHT of UTC
-       UTChourDelta = round((dateNOW-dateUTC).seconds / 3600, 1)       #print("   A>B")
+       UTChourDelta = round((dateNOW-dateUTC).seconds / 3600, 1)
     else:                   # On a map you're LEFT of UTC
        UTChourDelta = round((dateUTC-dateNOW).seconds / 3600, 1) * -1
     return UTChourDelta
 
+# ----------------------------------------------------------------------------------------
 # FUNCTION convert date to format displayed with each message. Used in HTML generation.
-#          this function checks the timezone difference between you and UTC and updates the
+#          This function checks the timezone difference between you and UTC and updates the
 #          message date/time so the actual times for your timezone are displayed.
-def convertDate(inputdate, hourdelta): # msg['created']
+def convertDate(inputdate, hourdelta):
     FMT = "%Y-%m-%dT%H:%M:%S.%fZ"
     dateMSG = datetime.datetime.strptime(inputdate, FMT)
     dateMSGnew = dateMSG + datetime.timedelta(hours=hourdelta)
-    return datetime.datetime.strftime(dateMSGnew, "%b %d, %H:%M     (%A  -  %Y)")
+    return datetime.datetime.strftime(dateMSGnew, "%A, %H:%M      (%b %d, %Y)")
 
 
-# FUNCTION convert date to format displayed with each message. Used in HTML generation.
-def convertDateOLD(inputdate):
-    return datetime.datetime.strptime(inputdate, "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%b %d, %H:%M  %A  (%Y)")
-
-
-# FUNCTION used in the lay-out and statistics. Used in HTML generation.
+# ----------------------------------------------------------------------------------------
+# FUNCTION used in the lay-out and statistics HTML generation.
 #          takes a date and outputs "2018" (year), "Feb" (short month), "2" (month number)
 def get_monthday(inputdate):
     myyear = datetime.datetime.strptime(inputdate, "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%Y")
@@ -483,14 +521,16 @@ def get_monthday(inputdate):
     return myyear, mymonth, mymonthnr
 
 
+# ----------------------------------------------------------------------------------------
 # FUNCTION that returns the time difference between 2 dates in seconds
-#           (to check if msg from the same author were send within 60 seconds)
+#           (to check if msgs from 1 author were send within 60 seconds: no new msg header)
 def timedifference(newdate, previousdate):
     FMT = "%Y-%m-%dT%H:%M:%S.%fZ"
     tdelta = datetime.datetime.strptime(newdate, FMT) - datetime.datetime.strptime(previousdate, FMT)
     return tdelta.seconds
 
 
+# ----------------------------------------------------------------------------------------
 # FUNCTION that returns the time difference between the msg-date and today (# of days)
 #           (used when setting max messages to XX days instead of number of msgs)
 def timedifferencedays(msgdate):
@@ -499,6 +539,7 @@ def timedifferencedays(msgdate):
     return tdelta.days
 
 
+# ----------------------------------------------------------------------------------------
 # FUNCTION finds URLs in message text + convert to a hyperlink. Used in HTML generation.
 def convertURL(inputtext):
     outputtext = inputtext
@@ -510,24 +551,28 @@ def convertURL(inputtext):
     return outputtext
 
 
-# FUNCTION to convert Markdown URL's [linktext](http://link.com)  to a clickable link
-def convertMarkdownURL(msgtext):
+# ----------------------------------------------------------------------------------------
+# FUNCTION to convert all Markdown URL's [linktext](http://link.com) to clickable links
+def convertMarkdownURL(msgtext, whichreplace):
     try:
-        regex = r"alt(.*?)event\);\""
+        if whichreplace == 1:
+            regex = r"alt=(.*?)event\);\""
+        if whichreplace == 2:
+            regex = r"\ onClick=(.*?)event\)\;\""
         matches = re.finditer(regex, msgtext, re.MULTILINE)
         matchDict = dict()  # create dictionary with match details so I can _reverse_ replace
         for matchNum, match in enumerate(matches, start=1):
             matchDict[matchNum] = [match.start(),match.end()]
         for i in sorted(matchDict.keys(), reverse=True):
-            msgtext = msgtext.replace(msgtext[matchDict[i][0]:matchDict[i][1]],"target='_blank'")
+            msgtext = msgtext[0:matchDict[i][0]] + " target='_blank'" + msgtext[matchDict[i][1]:]
     except:
         test = msgtext
         print(" **ERROR** replacing markdown URL's in text: " + msgtext)
     return msgtext
 
 
-
-# FUNCTION that retrieves a list of Space members (name + email address)
+# ----------------------------------------------------------------------------------------
+# FUNCTION that retrieves a list of Space members (displayName + email address)
 def get_memberships(mytoken, myroom, maxmembers):
     headers = {'Authorization': 'Bearer ' + mytoken, 'content-type': 'application/json; charset=utf-8'}
     payload = {'roomId': myroom, 'max': maxmembers}
@@ -535,7 +580,6 @@ def get_memberships(mytoken, myroom, maxmembers):
     while True:
         try:
             result = requests.get('https://api.ciscospark.com/v1/memberships', headers=headers, params=payload)
-            # **DJ** does it make sense to check for status_code here?
             if "Link" in result.headers:  # there's MORE members
                 headerLink = result.headers["Link"]
                 myCursor = headerLink[headerLink.find("cursor=")+len("cursor="):headerLink.rfind("==>")]
@@ -557,7 +601,8 @@ def get_memberships(mytoken, myroom, maxmembers):
     return resultjson
 
 
-# FUNCTION that retrieves all Space messages - testing error 429 catching
+# ----------------------------------------------------------------------------------------
+# FUNCTION that retrieves all space messages - testing error 429 catching
 def get_messages(mytoken, myroom, myMaxMessages):
     global maxTotalMessages
     headers = {'Authorization': 'Bearer ' + mytoken, 'content-type': 'application/json; charset=utf-8'}
@@ -568,17 +613,20 @@ def get_messages(mytoken, myroom, myMaxMessages):
         try:
             result = requests.get('https://api.ciscospark.com/v1/messages', headers=headers, params=payload)
             messageCount += len(result.json()["items"])
+            print(">> messageCount= " + str(messageCount))
             if "Link" in result.headers and messageCount < maxTotalMessages:  # there's MORE messages
                 resultjsonmessages = resultjsonmessages + result.json()["items"]
-                # When retrieving multiple batches _check_ if the last message retrieved is _OLDER_. If yes, trim results to the max age.
+                # When retrieving multiple batches _check_ if the last message retrieved
+                #      is _OLDER_ than the configured max msg age (in the .ini). If yes: trim results to the max age.
                 if msgMaxAge != 0:
                     msgAge = timedifferencedays(result.json()["items"][-1]["created"])
                     if msgAge > msgMaxAge:
                         print("          max messages reached (>" + str(msgMaxAge) + " days old)")
                         # NOW I set maxTotalMessages to the last msg index that should be included, based on msg age in days.
                         maxTotalMessages = next((index for (index,d) in enumerate(resultjsonmessages) if timedifferencedays(d["created"]) > msgMaxAge), 99999)
+                        print(str(maxTotalMessages))
                         break
-                print("          messages retrieved: " + str(messageCount)) # + "      (status: " + str(result.status_code) + ")")
+                print("          messages retrieved: " + str(messageCount))
                 myBeforeMessage = result.headers.get('Link').split("beforeMessage=")[1].split(">")[0]
                 payload = {'roomId': myroom, 'max': myMaxMessages, 'beforeMessage': myBeforeMessage}
                 continue
@@ -609,13 +657,15 @@ def get_messages(mytoken, myroom, myMaxMessages):
         exit()
     return resultjsonmessages[0:maxTotalMessages]
 
+# ----------------------------------------------------------------------------------------
 # FUNCTION to turn Teams Space name into a valid filename string
 def format_filename(s):
     valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
     filename = ''.join(c for c in s if c in valid_chars)
     return filename
 
-# FUNCTION get the Space-name (Used in the header + possibly for the filename)
+# ----------------------------------------------------------------------------------------
+# FUNCTION get the Space-name (Used in the header + optionally for the filename)
 def get_roomname(mytoken, myroom):
     headers = {'Authorization': 'Bearer ' + mytoken, 'content-type': 'application/json; charset=utf-8'}
     returndata = "webexteams-space-archive"
@@ -638,7 +688,7 @@ def get_roomname(mytoken, myroom):
             exit()
         elif result.status_code == 200:
             returndata = result.json()['title']
-    except Exception as e:  # **DJ** Really: do we need 429 error testing here?
+    except Exception as e:
         print(" ********* EXCEPTION *********" + str(e))
         if result.status_code == 429:
             print("       **ERROR** #1 get_roomname API call 429 - too many requests!! : " + str(result.status_code))
@@ -650,7 +700,8 @@ def get_roomname(mytoken, myroom):
     return str(returndata)
 
 
-# FUNCTION get your details. Name: displayed in the header.
+# ----------------------------------------------------------------------------------------
+# FUNCTION get your own details. Name: displayed in the header.
 #          Also used to get your email domain: mark _other_ domains as 'external' messages
 def get_me(mytoken):
     header = {'Authorization': "Bearer " + mytoken,'content-type': 'application/json; charset=utf-8'}
@@ -658,6 +709,7 @@ def get_me(mytoken):
     return result.json()
 
 
+# ----------------------------------------------------------------------------------------
 # FUNCTION to convert file-size "bytes" to readable format (KB,MB,GB)
 def convert_size(size_bytes):
     if size_bytes == 0:
@@ -669,11 +721,11 @@ def convert_size(size_bytes):
     return "%s %s" % (s, size_name[i])
 
 
-# FUNCTION download the images & files if enabled
+# ----------------------------------------------------------------------------------------
+# FUNCTION to download message images & files (if enabled)
 def process_Files(fileData):
     global myErrorList
     filelist = list()
-    # REQUEST File headers
     for url in fileData:
         headers = {"Authorization": f"Bearer {myToken}","Accept-Encoding": ""}
         r = requests.head(url, headers=headers)
@@ -681,7 +733,13 @@ def process_Files(fileData):
             continue
         try:
             filename = str(r.headers['Content-Disposition']).split("\"")[1]
-        except e as Exception:
+            # Files with no name or just spaces: fix so they can still be downloaded:
+            if len(filename) < 1 or filename.isspace():
+                filename = "unknown-filename"
+            if filename == ('+' * (int(len(filename)/len('+'))+1))[:len(filename)]:
+                filename = "unknown-filename"
+                beep(1)
+        except Exception as e:
             filename = "error-getting-filename"
             myErrorList.append("def process_Files Header 'content-disposition' error for url: " + url)
         filename = format_filename(filename)
@@ -696,11 +754,11 @@ def process_Files(fileData):
             # No file downloading --> just get the filename + size
             filelist.append(filename + "###" + filesize)
             continue
-        if "image" in downloadFiles and fileextension not in ['png', 'jpg','bmp', 'gif', 'tif']:
+        if "image" in downloadFiles and fileextension.lower() not in ['png', 'jpg','bmp', 'gif', 'tif', 'jpeg']:
             # File is not an image --> just get the filename + size
             filelist.append(filename + "###" + filesize)
             continue
-        if fileextension.lower() in ['png', 'jpg','bmp', 'gif', 'tif']:
+        if fileextension.lower() in ['png', 'jpg','bmp', 'gif', 'tif', 'jpeg']:
             # File is an image
             subfolder = "/images/"
         else:
@@ -728,16 +786,18 @@ def process_Files(fileData):
     return filelist
 
 
-# FUNCTION download member avatar. Will retry failed downloads max. 3 times.
+# ----------------------------------------------------------------------------------------
+# FUNCTION download member avatars (user images). Will retry failed downloads max. 3 times.
 def download_avatars(avatardictionary):
     global downloadAvatarCount
+    global myErrorList
+    myErrorList = [ elem for elem in myErrorList if "def download_avatars download failed" not in elem]
     retryDictionary = dict()
     for key, value in avatardictionary.items():
         filename = "".join(re.findall(r'[A-Za-z0-9]+', key))
         try:
             response = urllib.request.urlretrieve(value, myAttachmentFolder + "/avatars/" + filename)
         except Exception as e:
-            global myErrorList
             myErrorList.append("def download_avatars download failed (attempt #" + str(downloadAvatarCount) + ") for user: " + key + " with URL: " + value)
             retryDictionary[key] = value # Create temp dictionary for failed avatar downloads - retry later
             print("X", end='', flush=True)  # Progress indicator
@@ -749,7 +809,9 @@ def download_avatars(avatardictionary):
         download_avatars(retryDictionary)
 
 
-# FUNCTION download member avatar URLs
+# ----------------------------------------------------------------------------------------
+# FUNCTION download member details (that include the member avatar URL)
+#          only called when userAvatar = 'download' or 'link'
 def get_persondetails(mytoken, personlist):
     headers = {'Authorization': 'Bearer ' + mytoken, 'content-type': 'application/json; charset=utf-8'}
     personlist = str(personlist)[2:-2].replace("', '",",")
@@ -774,7 +836,10 @@ def get_persondetails(mytoken, personlist):
                 break
     return resultjsonmessages
 
-# FUNCTION download ALL SPACES
+
+# ----------------------------------------------------------------------------------------
+# FUNCTION download ALL SPACES - when you call this script with a parameter, it will
+#          search all of your spaces and return spaces that match your search string
 def get_searchspaces(mytoken, searchstring):
     headers = {'Authorization': 'Bearer ' + mytoken, 'content-type': 'application/json; charset=utf-8'}
     payload = {'sortBy': 'lastactivity', 'max': 900}
@@ -783,7 +848,7 @@ def get_searchspaces(mytoken, searchstring):
     while True:
         try:
             result = requests.get('https://api.ciscospark.com/v1/rooms', headers=headers, params=payload)
-            if result.status_code == 401:  # Wrong access token # **DJ** does it make sense to check for status_code here?
+            if result.status_code == 401:
                 print("    -------------------------- ERROR ------------------------")
                 print("       Please check your Access Token in the .ini file.")
                 print("           Note that your Access Token is only valid for 12 hours.")
@@ -817,7 +882,44 @@ def get_searchspaces(mytoken, searchstring):
             continue
     return resultjsonspaces
 
-performanceReport = "Performance Report - Space Archive Script \n ----------------------------------------------------"
+
+# ----------------------------------------------------------------------------------------
+# FUNCTION that creates a table with the message order (needed for threaded messages)
+def create_threading_order_table(WebexTeamsMessages):
+    msgOrderTable = dict()
+    msgOrderIndex = 1.000
+    for msg in WebexTeamsMessages:
+        if 'parentId' not in msg:  # NOT a threaded message
+            msgOrderTable[("%.3f" % msgOrderIndex)] = msg['id']
+            msgOrderIndex = msgOrderIndex + 1.000
+        else:   # THREADED MESSAGE!
+            # 1 get msgOrderIndex for parent ID in msgOrderTable.
+            try:
+                newOrderIndex = float(list(msgOrderTable.keys())[list(msgOrderTable.values()).index(msg['parentId'])])
+            except:
+                continue  # message belongs to thread outside of the current message scope
+            # 2 check if nr from parentid + 0.001 exists
+            while True:
+                if ("%.3f" % newOrderIndex) in msgOrderTable:
+                    newOrderIndex = float("%.3f" % (newOrderIndex + 0.001))
+                    continue
+                else:
+                    msgOrderTable[str(newOrderIndex)] = msg['id']
+                    break
+    return msgOrderTable
+
+
+# ----------------------------------------------------------------------------------------
+# FUNCTION that writes data to a file - not used right now
+def write_to_file(data,filename):
+    with open("./" + filename, 'w', encoding='utf-8') as f:
+        print(data, file=f)
+
+
+# ----------------------------------------------------------------------------------------
+# FUNCTIONs that help me analyze what takes the most time
+performanceReport = "Performance Report - Space Archive Script \n "
+performanceReport += "----------------------------------------------------"
 _start_time = time.time()
 def startTimer():
     global _start_time
@@ -827,11 +929,13 @@ def stopTimer(description):
     global performanceReport
     performanceReport += f"\n {t_sec:5.2f} " + description
 
+
 # ------------------------------------------------------------------------
 #    Start of non-function code !  #lastfunction
 #
 # ------------------------------------------------------------------------
 
+# ----------------------------------------------------------------------------------------
 # ===== SEARCH SPACES: If parameter provided, use it to search in your spaces, display result and exit
 if len(sys.argv) > 1:
     spaceSearchResults = get_searchspaces(myToken, ' '.join(sys.argv[1:]))
@@ -843,7 +947,8 @@ if len(sys.argv) > 1:
 
 
 
-# =====  GET SPACE NAME
+# =====  GET SPACE NAME ========================================================
+#   used for the space name in the header and optionally the output foldername
 startTimer()
 try:
     roomName = get_roomname(myToken, myRoom)
@@ -861,23 +966,21 @@ myAttachmentFolder = outputFileName
 
 
 
+# =====  GET MESSAGES ==========================================================
 startTimer()
-# =====  GET MESSAGES
 print(" #2 ----- Get MESSAGES")
 try:
     WebexTeamsMessages = get_messages(myToken, myRoom, 900)
 except Exception as e:
     print(" **ERROR** STEP #2: getting Messages")
     print("             Error message: " + str(e))
-    traceback.print_exc()
     beep(3)
     exit()
 stopTimer("get messages")
 
 
-
-# ===== CREATE USERLIST
-# Collect only userId's of users who wrote a message. For those users we will
+# ===== CREATE USERLIST ========================================================
+#   Collect only userId's of users who wrote a message. For those users we will
 #   retrieve details & download/link avatars
 startTimer()
 uniqueUserIds = list()
@@ -888,7 +991,9 @@ stopTimer("get unique user ids")
 
 
 
-# =====  GET MEMBER NAMES
+# =====  GET MEMBER NAMES ======================================================
+# myMembers used # of space members (stats).
+# myMemberList is used to get the displayName of users (msg only show email address - personEmail)
 startTimer()
 print(" #3 ----- Get MEMBER List") # Put ALL members in a dictionary that contains: "email + fullname"
 try:
@@ -906,8 +1011,8 @@ stopTimer("get memberlist")
 
 
 
+# =====  CREATE FOLDERS FOR ATTACHMENTS & AVATARS ==============================
 startTimer()
-# =====  CREATE FOLDERS FOR ATTACHMENTS & AVATARS
 print(" #4a ----- Create folder for HTML. Download files? " + downloadFiles)
 if not os.path.exists(myAttachmentFolder):
     print("             folder does NOT exist: " + myAttachmentFolder)
@@ -930,11 +1035,11 @@ stopTimer("create folders")
 
 
 
-# =====  GET MEMBER AVATARS
+# =====  GET MEMBER AVATARS ====================================================
 startTimer()
-print(" #4b----- MEMBER Avatars: collect avatar Data (" + str(len(uniqueUserIds)) + ")  ", end='', flush=True)
 if userAvatar == "link" or userAvatar == "download":
-    userAvatarDict = dict()    # userAvatarDict[your@email.com] = "https://webexteamsavatarurl"
+    print(" #4b----- MEMBER Avatars: collect avatar Data (" + str(len(uniqueUserIds)) + ")  ", end='', flush=True)
+    userAvatarDict = dict()  # userAvatarDict[your@email.com] = "https://webexteamsavatarurl"
     x=0
     y=len(uniqueUserIds)
     if 80 > y:
@@ -964,8 +1069,7 @@ if userAvatar == "link" or userAvatar == "download":
 stopTimer("download avatars")
 
 
-
-# =====  GET MY DETAILS
+# =====  GET MY DETAILS ========================================================
 startTimer()
 try:
     myOwnDetails = get_me(myToken)
@@ -978,8 +1082,7 @@ except Exception as e:
 stopTimer("get my details")
 
 
-
-# =====  SET/CREATE VARIABLES
+# =====  SET/CREATE VARIABLES ==================================================
 tocList = "<div class=''>"
 statTotalFiles = 0
 statTotalImages = 0
@@ -992,7 +1095,10 @@ previousMsgCreated = ""
 UTChourDelta = timeDeltaWithUTC()
 TimezoneName = str(time.tzname)
 
-# Write ALL JSON to a FILE to be used as input (not putting load on Webex Teams APIs)
+
+
+# ====== WRITE JSON data to a FILE =============================================
+#   (optional) Write JSON to a FILE to be used as input (not using the Webex Teams APIs)
 startTimer()
 if outputToJson == "yes" or outputToJson == "both" or outputToJson == "json":
     with open(myAttachmentFolder + "/" + outputFileName + ".json", 'w', encoding='utf-8') as f:
@@ -1001,48 +1107,94 @@ stopTimer("output to json")
 
 
 
-# ======  GENERATE HTML HEADER
+# ======  GENERATE HTML HEADER =================================================
+#
 print(" #6 ----- Generate HTML header")
 print("          Messages Processed:  " + str(statTotalMessages))
-htmlheader += f"<div class='cssRoomName'>   {roomName}&nbsp;&nbsp;&nbsp;<br><span style='float:left;margin-top:8px;font-size:10px;color:#fff'> CREATED: <span style='color:yellow'>{currentDate}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Generated by: <span style='color:yellow'>{myName}</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Message timezone: <span style='color:yellow'>{TimezoneName}</span>&nbsp;&nbsp;&nbsp; version: {version}&nbsp;&nbsp;&nbsp;<br>Sort old-new: <span style='color:yellow'>" + sortOldNew.replace("yes", "yes (default)") + f"</span> &nbsp;&nbsp; Max messages: <span style='color:yellow'> {maxMessageString} </span>&nbsp;&nbsp; File Download: <span style='color:yellow'>{downloadFiles.upper()}</span> </span> </div><br>"
+htmlheader += f"<div class='cssRoomName'>   {roomName}&nbsp;&nbsp;&nbsp;<br><span style='float:left;margin-top:8px;font-size:10px;color:#fff'> CREATED: <span style='color:yellow'>{currentDate}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Generated by: <span style='color:yellow'>{myName}</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Message timezone: <span style='color:yellow'>{TimezoneName}</span>&nbsp;&nbsp;&nbsp; version:  {version}&nbsp;&nbsp;&nbsp;<br>Sort old-new: <span style='color:yellow'>" + str(sortOldNew).replace("True", "yes (default)").replace("False", "no") + f"</span> &nbsp;&nbsp; Max messages: <span style='color:yellow'> {maxMessageString} </span>&nbsp;&nbsp; File Download: <span style='color:yellow'>{downloadFiles.upper()}</span> &nbsp;&nbsp; Avatar: <span style='color:yellow'>{userAvatar.upper()}</span></span> </div><br>"
 
 
 
+# ====== GENERATE FINAL HTML ===================================================
+#  for all messages (and optionally a .txt file with all messages)
+#
+startTimer()
+print(" #7 ----- Generate HTML code for each message")
 htmldata = ""
 textOutput = ""
 if outputToText:
-    textOutput += f"------------------------------------------------------------\n {roomName}\n------------------------------------------------------------\nCREATED:        {currentDate}\nFile Download:  {downloadFiles.upper()}\nGenerated by:   {myName}\nSort old-new:   " + sortOldNew.replace("yes", "yes (default)") + f"\nMax messages:   {maxMessageString} \nversion:        {version} \nTimezone:           {TimezoneName}"
+    textOutput += f"------------------------------------------------------------\n {roomName}\n------------------------------------------------------------\nCREATED:        {currentDate}\nFile Download:  {downloadFiles.upper()}\nGenerated by:   {myName}\nSort old-new:   " + str(sortOldNew).replace("True", "yes (default)").replace("False", "no") + f"\nMax messages:   {maxMessageString}\nAvatar:         {userAvatar} \nversion:        {version} \nTimezone:           {TimezoneName}"
 
-
-
-# ====== GENERATE HTML FOR EACH MESSAGE
-startTimer()
-print(" #7 ----- Generate HTML code for each message")
-if sortOldNew == "yes":  # Sorting messages 'old to new', unless configured otherwise
-    WebexTeamsMessages = sorted(WebexTeamsMessages, key=lambda k: k['created'])
 if downloadFiles in ['images', 'files']:
     print("          + download " + downloadFiles + " ", end='', flush=True)
 statTotalMentions = 0
-for msg in WebexTeamsMessages:
+
+startTimer()
+sortedMessages = sorted(WebexTeamsMessages, key = lambda i: i['created'],reverse=False)
+stopTimer("Sort WebexTeamsMessages")
+
+startTimer()
+# --- Message order table: create
+msgOrderTable = create_threading_order_table(sortedMessages)
+stopTimer("Create Threading order table")
+
+# --- Sort Messages: process all msgs defined by the "threading index"-table order
+if sortOldNew:
+    abc = sorted(msgOrderTable , key = lambda x : (float(x),-int(float(x))))
+else:
+    abc = sorted(msgOrderTable , key = lambda x : (-int(float(x)),float(x)))
+
+
+# --- PROCESS EVERY MESSAGE ----------------------------------------------------
+for index, key in enumerate(abc):
+    # find matching message ID in message list
+    msg = next(item for item in WebexTeamsMessages if item["id"] == msgOrderTable[key])
+    try:
+        nextitem = float(abc[index+1])
+        previousitem = float(abc[index-1])
+        currentitem = float(abc[index])
+        if previousitem - round(previousitem) == 0 and currentitem - round(currentitem) > 0:
+            # START of threaded message!
+            threadstart = True
+        else:
+            threadstart = False
+        if currentitem - round(currentitem) > 0:
+            threaded_message = True
+        else:
+            threaded_message = False
+    except:
+        threadstart = False
+        threaded_message = False
+
+    # --- continue processing messages
     if len(msg) < 5:
         continue        # message empty
-    if 'text' not in msg:
-        continue        # message without 'text' key
-    data_created = convertDate(str(msg['created']),UTChourDelta)
-    if "html" in msg:   # if html is there, use it to automatically deal with markdown
-        # Check if there are Markdown hyperlinks [linktext](www.cisco.com) as these look very different
+    data_text = ""
+    # --- if msg was updated: add 'Edited' in date
+    if "updated" in msg:
+        data_msg_was_edited = True
+        data_created = convertDate(str(msg['created']),UTChourDelta) + "  Edited"
+    else:
+        data_msg_was_edited = False
+        data_created = convertDate(str(msg['created']),UTChourDelta)
+    # --- HTML in message? Deal with markdown
+    if "html" in msg:
+        # --- Check if there are Markdown hyperlinks [linktext](www.cisco.com) as these look very different
         if "sparkBase.clickEventHandler(event)" in str(msg['html']):
-            data_text = convertMarkdownURL(str(msg['html']))
+            data_text = convertMarkdownURL(str(msg['html']),1)
+            data_text = convertMarkdownURL(data_text,2)
         else:
             data_text = convertURL(str(msg['html']))
-    else:
+            if "onClick" in msg['html']:
+                print(data_text)
+    elif 'text' in msg:
         data_text = convertURL(str(msg['text']))
         if "<code>" in data_text:
             if "</code>" not in data_text:
                 data_text += "</code>"
     if data_text == "" and 'files' not in msg and 'mentionedPeople' not in msg:
+        # empty text without mentions or attached images/files: SKIP
         continue
-        # ^^^ empty text without mentions or attached images/files: SKIP
     try:  # Put email & name in variable
         data_email = str(msg['personEmail'])
         data_userid = str(msg['personId'])
@@ -1057,31 +1209,38 @@ for msg in WebexTeamsMessages:
     statMessageMonthKey = messageYear + " - " + messageMonthNr + "-" + messageMonth
     statMessageMonth[statMessageMonthKey] = statMessageMonth.get(
         statMessageMonthKey, 0) + 1
-    if messageMonth != previousMonth:
+    if messageMonth != previousMonth and not threaded_message:
         htmldata += f"<div class='cssNewMonth' id='{statMessageMonthKey}'>   {messageYear}    <span style='color:#C3C4C7'>" + \
-            messageMonth + "</span><span style='float:right; font-size:16px; padding-top:24px;margin-right: 15px'><a href='#top'>back to top</a></span></div>"
+            messageMonth + "</span></div>"
         if outputToText:  # for .txt output
             textOutput += f"\n\n---------- {messageYear}    {messageMonth} ------------------------------\n\n"
     # ====== if PREVIOUS email equals current email, then skip header
-    if (data_email != previousEmail) or (data_email == previousEmail and timedifference(msg["created"], previousMsgCreated) > 60):
+    if threaded_message: # ___________________________________ start thread ______________________________
+        htmldata += "<div class='css_message_thread'>"
+    else:
+        htmldata += "<div class='css_message'>"
+
+    # ====== AVATAR: + msg header: display or not
+    if (data_email != previousEmail) or (data_email == previousEmail and timedifference(msg["created"], previousMsgCreated) > 60) or (data_msg_was_edited):
         if userAvatar == "link" and data_userid in userAvatarDict:
-            htmldata += f"<img src='{userAvatarDict[data_userid]}' class='message-avatar'  width='36px' height='36px'/><div class='css_message'>"
+            htmldata += f"<img src='{userAvatarDict[data_userid]}' class='avatarCircle'  width='36px' height='36px'/>"
         elif userAvatar == "download" and data_userid in userAvatarDict:
-            htmldata += f"<img src='avatars/" + data_userid + "' class='message-avatar'  width='36px' height='36px'/><div class='css_message'>"
+            htmldata += f"<img src='avatars/" + data_userid + "' class='avatarCircle'  width='36px' height='36px'/>"
         else: # User that may not exist anymore --> use email as name
             if data_name == data_email:
-                htmldata += f"<div id='avatarCircle'>{data_name[0:2].upper()}</div><div class='css_message'>"
+                htmldata += f"<div id='avatarCircle'>{data_name[0:2].upper()}</div>"
             else:
+                # show circle with initials instead of avatar
                 try:
                     htmldata += "<div id='avatarCircle'>" + data_name.split(" ")[0][0].upper() + data_name.split(" ")[1][0].upper()+ "</div><div class='css_message'>"
                 except:  # Sometimes there's no "first/last" name. If one word, take the first 2 characters.
-                    htmldata += "<div id='avatarCircle'>" + data_name[0:2].upper() + "</div><div class='css_message'>"
-            # ^^ show circle with initials instead of bubble.
+                    htmldata += "<div id='avatarCircle'>" + data_name[0:2].upper() + "</div>"
+
         msgDomain = data_email.split("@")[1]    # Get message sender domain
         if myDomain == msgDomain:               # If domain <> own domain, use different color
             htmldata += f"<span class='css_email' title='{data_email}'>{data_name}</span>"
         else:
-            htmldata += f"<span class='css_email_external' title='{data_email}'>{data_name}</span>"
+            htmldata += "<span class='css_email' title='" + data_email + "'>" + data_name + "</span>   <span class='css_email_external'>(@" + data_email.split("@")[1] + ")</span>"
         htmldata += f"<span class='css_created'>{data_created}</span>"
     else:
         htmldata += "<div class='css_message'>"
@@ -1099,6 +1258,16 @@ for msg in WebexTeamsMessages:
             data_text = data_text.replace("</spark-mention>","</span>")
         except:
             print(" **ERROR** processing mentions, don't worry, I will continue")
+    if 'mentionedGroups' in msg:
+        try:
+            statTotalMentions += 1
+            for item in msg['mentionedGroups']:
+                texttoreplace = "<spark-mention data-object-type=\"groupMention\" data-group-type=\"" + item + "\">"
+                data_text = data_text.replace(texttoreplace,"<span style='color:red;display:inline;'>@")
+            data_text = data_text.replace("</spark-mention>","</span>")
+        except:
+            print(" **ERROR** processing mentions, don't worry, I will continue")
+
     htmldata += "<div class='css_messagetext'>" + data_text
     if outputToText and 'mentionedPeople' in msg:  # for .txt output
         p = re.compile(r'<.*?>')
@@ -1112,17 +1281,24 @@ for msg in WebexTeamsMessages:
         if data_text != "":
             htmldata += "<br>"
         myFiles = process_Files(msg['files'])
+        # SORT attached files by <files> _then_ <images>
+        myFiles.sort(key = lambda x: x.split("###")[0].split(".")[-1] in ['jpg','png','jpeg'])
+        splitFilesImages = ""
         for filename in myFiles:
             # IMAGE POPUP
             filename, filesize = filename.split("###")
-            fileextension = filename[-3:].lower()
-            if fileextension in ['png', 'jpg', 'bmp', 'gif', 'tif'] and (downloadFiles in ["images", "files"]):
-                htmldata += f"<img src='images/{filename} ' title='click to zoom' onclick='onClick(this)' class='image-hover-opacity'/><br><div class='css_created'>{filesize} <strong>  -  </strong> {filename} </div>"
+            fileextension = os.path.splitext(filename)[1][1:].lower()
+            if fileextension in ['png', 'jpg', 'bmp', 'gif', 'tif', 'jpeg'] and (downloadFiles in ["images", "files"]):
+                if splitFilesImages == "":
+                    # extra return after all attached files are listed
+                    htmldata += "<br>"
+                    splitFilesImages = "done"
+                htmldata += f"<div class='css_created'><img src='images/{filename} ' title='click to zoom' onclick='onClick(this)' class='image-hover-opacity' /><br>{filename}<br><div class='filesize'>{filesize}</div> </div>"
             elif downloadFiles == "files":
                 htmldata += f"<br><div id='fileicon'></div><span style='line-height:32px;'><a href='files/{filename}'>{filename}</a>  ({filesize})"
             else:
                 htmldata += f"<br><div id='fileicon'></div><span style='line-height:32px;'> {filename}   ({filesize})</span>"
-            if fileextension in ['png', 'jpg', 'bmp', 'gif', 'tif']:
+            if fileextension in ['png', 'jpg', 'bmp', 'gif', 'tif', 'jpeg']:
                 statTotalImages += 1
             else:
                 statTotalFiles += 1
@@ -1131,12 +1307,12 @@ for msg in WebexTeamsMessages:
         htmldata += "</span>"
     htmldata += "</div>"
     htmldata += "</div>"
+    htmldata += "</div>"
     previousEmail = data_email
-    previousMonth = messageMonth
+    if not threaded_message:
+        previousMonth = messageMonth
     previousMsgCreated = msg['created']
 stopTimer("generate HTML")
-
-
 
 # ======  *SORT* DOMAIN USER STATISTICS
 startTimer()
@@ -1148,11 +1324,10 @@ returntextMsgMonth = ""
 stopTimer("sorting messages")
 
 
-
-# ======  TABLE OF CONTENTSstartTimer()
+# ======  TABLE OF CONTENTS
 startTimer()
 tocList += "<table id='mytoc' style='width: 95%;'>"
-if sortOldNew == "yes":
+if sortOldNew:
     mytest = sorted(statMessageMonth.items(), reverse=False)
 else:
     mytest = sorted(statMessageMonth.items(), reverse=True)
@@ -1167,10 +1342,9 @@ for k, v in mytest:
         v) + "</span></td></tr>"
 # If message sorting is old-to-new, also sort the TOC
 messageType = "last"
-if sortOldNew == "no": messageType = "last"
+if not sortOldNew: messageType = "last"
 tocList += "<tr><td colspan='2'>&nbsp;&nbsp;&nbsp;<span style='font-size:11px;'><a href='#endoffile'>" + messageType + " message</a></span></td></tr>"
 tocList += "</table>"
-
 
 
 # ======  DOMAIN MESSAGE STATISTICS
@@ -1180,25 +1354,28 @@ for domain in myDomainStatsSorted:
 returntextDomain += "</table>"
 
 
-
 # ======  MESSAGE & FILE STATISTICS
 tocStats = "<table id='mytoc'>"
 tocStats += "<tr><td># of messages: </td><td>" + str(statTotalMessages) + "</td></tr>"
 tocStats += "<tr><td> # images: </td><td>" + str(statTotalImages) + "</td></tr>"
 tocStats += "<tr><td> # files: </td><td>" + str(statTotalFiles) + "</td></tr>"
 tocStats += "<tr><td># mentions: </td><td>" + str(statTotalMentions) + "</td></tr>"
+tocStats += "<tr><td># total members: </td><td>" + str(len(myMembers)) + "</td></tr>"
+tocStats += "<tr><td># unique members:<br>&nbsp;&nbsp;&nbsp;<span style='font-size:11px;'>(in this archive)</span> </td><td>" + str(len(uniqueUserIds)) + "</td></tr>"
 # if not ALL messages have been archived: show message
 if statTotalMessages > maxTotalMessages -10:
     tocStats += "<tr><td colspan='2'><br><span style='color:grey;font-size:10px;'>space contains more than " + str(statTotalMessages) + " messages</span></td></tr>"
 tocStats += "</table>"
 if outputToText:  # for .txt output
     textOutput += f"\n\n\n STATISTICS \n--------------------------\n # of messages : {statTotalMessages}\n # of images   : {statTotalImages}\n # of files    : {statTotalFiles}\n # of mentions : {statTotalMentions}\n\n\n"
+
 # ======  HEADER
-newtocList = "<table id='myheader'> <tr>"
+newtocList = "<table class='myheader' id='myheader'> <tr>"
 newtocList += "<td> <strong>Index</strong><br>" + tocList + " </td>"
 newtocList += "<td> <strong>Numbers</strong><br>" + tocStats + " </td>"
-newtocList += "<td> <strong>Messages top-10 domains</strong><br>" + returntextDomain + " </td>"
+newtocList += "<td> <strong>Top-10 user domains</strong><br>" + returntextDomain + " </td>"
 newtocList += "</tr> </table></div><br><br>"
+
 # ====== IMAGE POPUP
 imagepopuphtml = """      <div id="modal01" class="image-modal" onclick="this.style.display='none'">
          <div class="image-modal-content image-animate-zoom">
@@ -1234,6 +1411,7 @@ imagepopuphtml = """      <div id="modal01" class="image-modal" onclick="this.st
          </script>
 
 """
+
 # ======  FOOTER
 htmlfooter = "<br><br><div class='cssNewMonth' id='endoffile'> end of file &nbsp;&nbsp;<span style='float:right; font-size:16px; margin-right:15px; padding-top:24px;'><a href='#top'>back to top</a></span></div><br><br>"
 
@@ -1241,7 +1419,6 @@ htmlfooter = "<br><br><div class='cssNewMonth' id='endoffile'> end of file &nbsp
 print("\n #8 ----- Finalizing HTML")
 htmldata = htmlheader + newtocList + htmldata + htmlfooter + imagepopuphtml + "</body></html>"
 stopTimer("toc,domainstats,header,footer + combining")
-
 
 
 # ======  WRITE HTML to FILE
@@ -1265,3 +1442,6 @@ if printPerformanceReport:
 if outputToText:
     with open(myAttachmentFolder + "/" + outputFileName + ".txt", 'w', encoding='utf-8') as f:
         print(textOutput, file=f)
+
+
+# ------------------------------- end of code -------------------------------
