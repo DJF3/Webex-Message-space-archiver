@@ -21,9 +21,11 @@ Archive Cisco Webex Teams Space messages to a single HTML file. It is based on t
 NOTE: This code is written for a customer as an example. I specifically wanted 1 (one) .py file that did everything. It's not beautiful code but it works :-)
 Feedback? Please go [here](#feedback) and let me know what you think!
 
+Example HTML file of an archived Webex Teams space: 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/DJF3/Webex-Teams-Space-Archive-v2/master/webexteams-archive-screenshot.jpg" width="600px">
+
 # VIDEO: [How to use & Demo](https://youtu.be/gula_Hxh2ms) 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/DJF3/Webex-Teams-Space-Archive-v2/master/webexteams-archive-screenshot.jpg" width="400px">
 
 # REQUIREMENTS
 * A (free) [Webex Teams](https://www.webex.com/team-collaboration.html) account
@@ -40,6 +42,7 @@ Feedback? Please go [here](#feedback) and let me know what you think!
 ### DOES:
 * Archive all messages in a space
 * Find space ID with built in search function
+* Deal with threaded messages
 * Download space images, files or both
 * All files are organized: \spacenamefolder with subfolders for \files, \images, \avatars
 * Export space data to JSON or TXT file
@@ -58,22 +61,25 @@ Feedback? Please go [here](#feedback) and let me know what you think!
 * Clean your dishes
 * Download whiteboards (unless you post a snapshot)
 * Download/display files shared in external Enterprise Content Management systems (Onedrive/Sharepoint)
+* Display reactions to messages (not accessible via API)
 
 ### NOTE:
 
 * The message TIME **displayed** is in the UTC timezone. The timezone on your device defines how this UTC time/date is displayed. A message send at 12:43 CEST is stored as 10:43 UTC. When you change your timezone to PDT (UTC-7) it will be displayed as 03:43.
-* When printing the generated HTML file in Firefox: File, Print, check "print background colors and images", then print or save to PDF
+* When **printing** the generated HTML file in Firefox: File, Print, check "print background colors and images", then print or save to PDF
 
 
 <a name="start"/>
 
 # Start
 
-1. Run the script to create the configuration file "webexteamsarchive-config.ini" (if it does not exist)
+1. Make sure you meet the requirements
 
-2. Update your developer token in the webexteamsarchive-config.ini file. Save the file.
+2. Run the script to create the configuration file "webexteamsarchive-config.ini" (if it does not exist)
 
-3. Now you can:
+3. Update your developer token in the webexteamsarchive-config.ini file. Save the file.
+
+4. Now you can:
 * Run the script to archive a space.
 * Run the script with your search argument as a parameter to find the right space ID. Example: python webex-teams-space-archive.py customername
 
@@ -163,10 +169,6 @@ Most of the errors should be handles by the script.
 # Release Notes
 
 ## Enhancements in release v20 - February 11th 2020
-**NOTE**
-- Reactions (smiley, thumbs up, etc) are not displayed (info not visible via the API)
-- Spaces with Sharepoint/Onedrive files attached are not shown (info not visible via the API)
-- Space with whiteboards - NOTHING is shown - except if a whiteboard snapshot is posted (PDF)
 
 **NEW**
 - !! MESSAGE THREADING: Supporting message threading !!
