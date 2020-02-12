@@ -1,4 +1,4 @@
-**NOTE: the 0.20 release supports threaded messages!**
+**NOTE: the new 0.20 release supports threaded messages!**
 
 [Features](#features)
 
@@ -16,7 +16,7 @@
 
 
 
-# Webex Teams Space Archive NEW
+# Webex Teams Space Archive 
 Archive Cisco Webex Teams Space messages to a single HTML file. It is based on the older [Webex Teams Space archiver](https://github.com/DJF3/Webex-Teams-Space-Archive). Because of the major updates I published it in *this* repository. You can use one or the other.
 NOTE: This code is written for a customer as an example. I specifically wanted 1 (one) .py file that did everything. It's not beautiful code but it works :-)
 Feedback? Please go [here](#feedback) and let me know what you think!
