@@ -1,3 +1,5 @@
+# Webex Teams Space Archive 
+
 **NOTE: the new 0.20 release supports threaded messages!**
 
 [Features](#features)
@@ -15,17 +17,12 @@
 [Feedback & Support](#feedback)
 
 
-
-# Webex Teams Space Archive 
 Archive Cisco Webex Teams Space messages to a single HTML file. It is based on the older [Webex Teams Space archiver](https://github.com/DJF3/Webex-Teams-Space-Archive). Because of the major updates I published it in *this* repository. You can use one or the other.
 NOTE: This code is written for a customer as an example. I specifically wanted 1 (one) .py file that did everything. It's not beautiful code but it works :-)
 Feedback? Please go [here](#feedback) and let me know what you think!
 
 Example HTML file of an archived Webex Teams space: 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/DJF3/Webex-Teams-Space-Archive-v2/master/webexteams-archive-screenshot.jpg" width="600px">
-
-Example: the generated HTML file header with navigation and statistics: 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/DJF3/Webex-Teams-Space-Archive-v2/master/webexteams-archive-screenshot-header.jpg" width="800px">
 
 # VIDEO: [How to use & Demo](https://youtu.be/gula_Hxh2ms) 
 
@@ -39,7 +36,7 @@ Example: the generated HTML file header with navigation and statistics:
 
 
 <a name="features"/>
-
+        
 # Features
 
 ### DOES:
