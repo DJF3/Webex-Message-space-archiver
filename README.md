@@ -1,6 +1,6 @@
 # Webex Teams Space Archiver 
 
-**NOTE: the new 0.20 release supports threaded messages!**
+**NOTE: the new 2.20 release supports threaded messages!**
 
 [Features](#features)
 
