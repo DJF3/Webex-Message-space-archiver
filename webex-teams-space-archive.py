@@ -3,7 +3,7 @@
 Creates a single HTML file with the messages of a Webex Teams space
 Info/Requirements/release-notes: https://github.com/DJF3/Webex-Teams-Space-Archive-v2/
 And here: https://tools.sparkintegration.club/sparkarchive
-Copyright (c) 2019 Cisco and/or its affiliates.
+Copyright (c) 2020 Cisco and/or its affiliates.
 This software is licensed to you under the terms of the Cisco Sample
 Code License, Version 1.1 (the "License"). You may obtain a copy of the
 License at
