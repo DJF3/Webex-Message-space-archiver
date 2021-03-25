@@ -12,8 +12,6 @@
 
 [Troubleshooting](#troubleshooting)
 
-[Roadmap](#roadmap)
-
 [Feedback & Support](#feedback)
 
 
@@ -40,7 +38,6 @@ Example HTML file of an archived Webex Teams space:
         
 # Features
 
-### DOES:
 * Archive all messages in a space
 * Find space ID with built in search function
 * Deal with threaded messages
@@ -58,13 +55,13 @@ Example HTML file of an archived Webex Teams space:
 * Display: images in popup when clicked
 * Print: just like it appears on the screen
 
-### DOESN'T:
+## It doesn't:
 * Clean your dishes
 * Download whiteboards (unless you post a snapshot)
 * Download/display files shared in external Enterprise Content Management systems (Onedrive/Sharepoint)
 * Display reactions to messages (not accessible via API)
 
-### NOTE:
+## NOTE:
 
 * The message TIME **displayed** is in the UTC timezone. The timezone on your device defines how this UTC time/date is displayed. A message send at 12:43 CEST is stored as 10:43 UTC. When you change your timezone to PDT (UTC-7) it will be displayed as 03:43.
 * When **printing** the generated HTML file in Firefox: File, Print, check "print background colors and images", then print or save to PDF
@@ -287,9 +284,9 @@ Most of the errors should be handles by the script.
 * ~~PRINTing the HTML page to PDF (for example) will mess up lay-out (fixed in v0.19a)~~
 
 
-<a name="roadmap"/>
 
 # Roadmap
+
 * LAYOUT: more images in a single message displayed left to right instead of below each other. + first show files, then images. (version 0.19b)
 ~~* PRINT: update lay-out so printing works great (version 0.19a)~~
 * WEB: make this script web-based
