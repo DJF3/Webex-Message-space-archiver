@@ -283,7 +283,7 @@ Most of the errors should be handles by the script.
 * If _HTML code_ is written as TEXT (without marking it as code using  ```), the message may not be displayed or it could mess up the lay-out for remaining messages
 * ~~PRINTing the HTML page to PDF (for example) will mess up lay-out (fixed in v0.19a)~~
 
-
+and lastly...
 
 # Roadmap
 
