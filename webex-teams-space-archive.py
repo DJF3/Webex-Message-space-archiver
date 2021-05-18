@@ -697,7 +697,7 @@ def get_roomname(mytoken, myroom):
             print("       **ERROR** #1 get_roomname API call status text: " + str(result.text))
         beep(3)
         exit()
-    return str(returndata)
+    return str(returndata.strip())
 
 
 # ----------------------------------------------------------------------------------------
