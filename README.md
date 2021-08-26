@@ -19,10 +19,12 @@ Archive Cisco Webex Teams Space messages to a single HTML file. It is based on t
 NOTE: This code is written for a customer as an example. I specifically wanted 1 (one) .py file that did everything. It's not beautiful code but it works :-)
 Feedback? Please go [here](#feedback) and let me know what you think!
 
-**VIDEO: [How to use & Demo](https://youtu.be/gula_Hxh2ms)**
+# VIDEO & screenshot 
+**VIDEO**: [**_How to use & Demo_**](https://youtu.be/gula_Hxh2ms)
 
-Example HTML file of an archived Webex Teams space: 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/DJF3/Webex-Teams-Space-Archive-v2/master/webexteams-archive-screenshot.jpg" width="600px">
+**SCREENSHOT**: Example HTML file of an archived Webex Teams space: 
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/DJF3/Webex-Teams-Space-Archive-v2/master/webexteams-archive-screenshot.jpg" width="600px">
 
 
 
