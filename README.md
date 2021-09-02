@@ -1,6 +1,6 @@
-# Webex Teams Space Archiver 
+# Webex Space Archiver 
 
-**NOTE: the new 2.20 release supports threaded messages!**
+**NEW: release - 2.21!** (check out the [release notes](#releasenotes))
 
 [Features](#features)
 
@@ -15,24 +15,22 @@
 [Feedback & Support](#feedback)
 
 
-Archive Cisco Webex Teams Space messages to a single HTML file. It is based on the older [Webex Teams Space archiver](https://github.com/DJF3/Webex-Teams-Space-Archive). Because of the major updates I published it in *this* repository. You can use one or the other.
-NOTE: This code is written for a customer as an example. I specifically wanted 1 (one) .py file that did everything. It's not beautiful code but it works :-)
+Archive Cisco Webex space messages to a single HTML file. NOTE: This code is written for a customer as an example. I specifically wanted 1 (_one_) .py file that did everything. It's not beautiful code but it works :-)
 Feedback? Please go [here](#feedback) and let me know what you think!
 
 # VIDEO & screenshot 
 **VIDEO**: [**_How to use & Demo_**](https://youtu.be/gula_Hxh2ms)
 
-**SCREENSHOT**: Example HTML file of an archived Webex Teams space: 
+**SCREENSHOT**: Example HTML file of an archived Webex space: 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/DJF3/Webex-Teams-Space-Archive-v2/master/webexteams-archive-screenshot.jpg" width="600px">
-
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/DJF3/Webex-Message-space-archiver/master/webexteams-archive-screenshot.jpg" width="600px">
 
 
 # REQUIREMENTS
-* A (free) [Webex Teams](https://www.webex.com/team-collaboration.html) account
+* A (free) [Webex](https://www.webex.com/team-collaboration.html) account
 * Python 3.6 or higher
 * Python '[requests](http://docs.python-requests.org/en/master/user/install/#install)' library
-* Be a member of the Webex Teams Space you want to archive
+* Be a member of the Webex message space you want to archive
 * Mac: SSL fix (see [troubleshooting](#troubleshooting) section at the end)  
 
 
@@ -43,7 +41,7 @@ Feedback? Please go [here](#feedback) and let me know what you think!
 * Archive all messages in a space
 * Find space ID with built in search function
 * Deal with threaded messages
-* Download space images, files or both
+* Download space images, files or both (with msg file date)
 * All files are organized: \spacenamefolder with subfolders for \files, \images, \avatars
 * Export space data to JSON or TXT file
 * Restrict messages by number of messages or number of days
@@ -75,13 +73,13 @@ Feedback? Please go [here](#feedback) and let me know what you think!
 
 1. Make sure you meet the requirements
 
-2. Run the script to create the configuration file "webexteamsarchive-config.ini" (if it does not exist)
+2. Run the script to _create the configuration file_ "webexspacearchive-config.ini" (if it does not exist)
 
-3. Update your developer token in the webexteamsarchive-config.ini file. Save the file.
+3. In the webexspacearchive-config.ini file, update your developer token. Save the file.
 
 4. Now you can:
-* Run the script to archive a space.
-* Run the script with your search argument as a parameter to find the right space ID. Example: python webex-teams-space-archive.py customername
+* Run the script with a search argument as a parameter to find the space ID. Example: 'python webex-space-archive.py spacename'
+* Run the script without parameters to archive a space that is configured in the .ini file.
 
 
 
@@ -100,7 +98,7 @@ Edit the following variables in the python file:
 ---
 
 **Space ID**: To find this, first save your developer token in the .ini file. Then run the script with a search arguments as a parameter. It will list all spaces+spaceId that match you search argument.
-Alternatively: go to [Webex Teams Developer List rooms](https://developer.webex.com/endpoint-rooms-get.html), make sure you're logged in, set the 'max' parameter to '900' and click Run.
+Alternatively: go to [Webex Developer List rooms](https://developer.webex.com/docs/api/v1/rooms/list-rooms), make sure you're logged in, set the 'max' parameter to '900' and click Run.
 If you don't see the RUN button, make sure 'test mode' is turned on (top of page, under "Documentation")
 > **myspaceid = "YOUR_SPACE_ID_HERE"**
 
@@ -142,7 +140,7 @@ If you don't see the RUN button, make sure 'test mode' is turned on (top of page
 **Sorting**: of archived messages.
 > **sortoldnew = yes**
 
-- "yes"   : (default) last message at the bottom (like in the Teams client)
+- "yes"   : (default) last message at the bottom (like in the Webex client)
 - "no"     : latest message at the top
 
 ---
@@ -167,6 +165,44 @@ Most of the errors should be handles by the script.
 <a name="releasenotes"></a>
 
 # Release Notes
+
+## Enhancements in release v21 - September 2th 2021
+
+**NEW**
+- FILE   - !! downloaded files get the time/date as the message where they were attached to!
+- SEARCH - !! results are split in direct & group spaces (separate bots/users and group spaces)
+- SEARCH - space search has a progress indicator
+- REPORT - performance report shows nr of messages (+ msg/per second)
+- AVATAR - downloads: updated code to use the requests library --> removed urllib
+- AVATAR - filenames: add ".jpg" to downloaded avatars (because they are .jpg files)
+- VISUAL - as Webex cards are way to complex to render, a clear label is added to Cards messages
+- VISUAL - show progress bar while generating HTML (this is the most time consuming process)
+- VISUAL - show progress bar while retrieving messages (this process also takes a lot of time)
+- VISUAL - add thousands separator in statistics to make it easier to read
+- VISUAL - align message count to the right (align all stat counts to the right)
+- VISUAL - changed font to the -Light variant of HelveticaNeue
+
+**FIXED BUGS**
+- LAY-OUT - month msg count, now using class and removed align:right;
+- LAY-OUT - many small changes to increase readability and consistency
+- VISUAL  - "#7 generating HTML" is now showing that this includes downloading of files
+- VISUAL  - step 4c starts on the same line after step4b.
+- VISUAL  - performance report reserve more digits for time (7 instead of 3)
+- INTERACTION - In very specific scenarios cards can cause an error --> help message with suggestion
+- INTERACTION - not all exit commands played 3 beeps
+- CODE   - Can't create folder if space name ends with a space. get_roomname return: includes strip()
+- CODE   - change api.ciscospark.com to the new webexapis.com
+- SEARCH - space search had a bug and is now working reliably and efficient
+- SEARCH - Search for spaces --> error 504. Changed the list_rooms max from 900 to 500 and deal with errors
+- REBRANDING - change name from Webex Teams to Webex.
+- REBRANDING - change filenames to remove 'teams'
+- REBRANDING - because of the name change: check for files with the old name, give instructions and stop.
+- PROCESSING - messages with many URLs: regex replaced every single url. Now only unique urls are replaced
+- READ PEOPLE - when getting >50 personIds->URL length>5000 char->Error. lowered chunksize from 80 to 50.
+- REPORT - performance report doesn't crash if "generate HTML" is <1 second.
+- OUTPUT - Don't interpret TEXT like "<script" --> change to "<pre>&lt;script".
+
+
 
 ## Enhancements in release v20 - February 11th 2020
 
@@ -292,7 +328,7 @@ and lastly...
 * LAYOUT: more images in a single message displayed left to right instead of below each other. + first show files, then images. (version 0.19b)
 ~~* PRINT: update lay-out so printing works great (version 0.19a)~~
 * WEB: make this script web-based
-   * Login using Webex Teams (oAuth)
+   * Login using Webex (oAuth)
    * Select space to archive
    * Space messages are exported to an HTML file
    * User receives 1:1 message from a Bot with the HTML file attached
@@ -302,3 +338,5 @@ and lastly...
 
 # Feedback & Support
 Please click this link and [enter your feedback](https://tools.sparkintegration.club/forms/joinspace/jv4kauin9bm7cs01va5vhosi3jro6a/) in the text field. If you want me to respond let me know in your message and enter your real email address.
+
+This is based on the older [Webex Teams Space archiver](https://github.com/DJF3/Webex-Teams-Space-Archive). Because of the major updates I published it in *this* repository. 
