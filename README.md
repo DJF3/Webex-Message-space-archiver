@@ -1,6 +1,6 @@
 # Webex Space Archiver 
 
-**NEW: release - 2.21!** (check out the [release notes](#releasenotes))
+**NEW: release - 2.21!** (check out new features in the [release notes](#releasenotes))
 
 [Features](#features)
 
@@ -81,6 +81,8 @@ Feedback? Please go [here](#feedback) and let me know what you think!
 * Run the script with a search argument as a parameter to find the space ID. Example: 'python webex-space-archive.py spacename'
 * Run the script without parameters to archive a space that is configured in the .ini file.
 
+**UPGRADE?**
+Replace the .py file and keep the configuration file (.ini). 
 
 
 <a name="configuration"/>
