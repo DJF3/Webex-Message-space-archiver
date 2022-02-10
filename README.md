@@ -227,7 +227,8 @@ Most of the errors should be handles by the script.
 - VISUAL: with total/avg file size stats, don't round(2) for anything lower than GB 
 - VISUAL: When printing, _long_ strings would not be wrapped: --> 'word-break: break-word;'
 - VISUAL: When a _folder_ is configured in the 'outputFileName': throw error message
-- BUG: "# webex4devs" space: '#' in the filename is removed, leaving a space. --> also removing space 
+- VISUAL: html code in "text" field was interpreted (changing layout/fonts/colors/etc)
+- BUG: space name with "#", the '#' is removed leaving a space. --> also removing space 
 - BUG: wrong brackets in javscript code of generated html (for expand/collapse of months)
 - BUG: created parents have a fake user id --> this caused a problem downloading avatars
 - BUG: created parents (that did not exist) were not written to JSON output
