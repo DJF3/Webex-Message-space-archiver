@@ -68,6 +68,9 @@ Example HTML file of an archived Webex space:
 
 * The message TIME **displayed** is in the UTC timezone. The timezone on your device defines how this UTC time/date is displayed. A message send at 12:43 CEST is stored as 10:43 UTC. When you change your timezone to PDT (UTC-7) it will be displayed as 03:43.
 * When **printing** the generated HTML file in Firefox: File, Print, check "print background colors and images", then print or save to PDF
+* To store your Webex token in an environment variable:
+  * Windows: ```set WEBEX_ARCHIVE_TOKEN=YOUR_TOKEN_HERE```
+  * Mac: ```export WEBEX_ARCHIVE_TOKEN='YOUR_TOKEN_HERE'```
 
 
 <a name="start"/>
@@ -99,6 +102,7 @@ Edit the following variables in the python file:
 ---
 
 **Personal Token**: you can find this on [developer.webex.com](https://developer.webex.com/docs/api/getting-started), login (top right of the page) and then scroll down to "Your Personal Access Token".
+_NOTE_ see the 'NOTE' section above to see how you can also use an environment variable to store your token!
 > **mytoken = "YOUR_TOKEN_HERE"**
 
 ***NOTE***: This token is valid for 12 hours! Then you have to get a new Personal Access Token.
