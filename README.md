@@ -14,6 +14,7 @@
 
 [Feedback & Support](#feedback)
 
+[<img src="https://camo.githubusercontent.com/7a785e6fab9f9040fb3739fdc2df1284b3ef199c7450b3d379716b365a37156f/68747470733a2f2f7374617469632e70726f64756374696f6e2e6465766e6574636c6f75642e636f6d2f636f646565786368616e67652f6173736574732f696d616765732f6465766e65742d7075626c69736865642e737667" alt="published" data-canonical-src="https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg" style="max-width: 100%;">](https://developer.cisco.com/codeexchange/github/repo/DJF3/Webex-Teams-Space-Archive-v2/) 
 
 Archive Cisco Webex space messages to a single HTML file. NOTE: This code is written for a customer as an example. I specifically wanted 1 (_one_) .py file that did everything. It's not beautiful code but it works :-)
 Feedback? Please go [here](#feedback) and let me know what you think!
@@ -240,6 +241,7 @@ Most of the errors should be handles by the script.
 
 **OPEN**
 - VISUAL: When retrieving messages between 2 dates, the total-message-count may not be 100% accurate. (only affects a statistic in the header)
+- TIMEZONE: Generated HTML not using DST ("summertime"), to be addressed in an upcoming release
 
 **NOTE**
 - CARDS: cards and buttons won't be visible in the html
