@@ -267,4 +267,4 @@ Overall: increased output quality and precision. Support for DST, privacy blurri
 <a name="feedback"/>
 
 # Feedback & Support
-Open an issue, or if you know my email address: send a message on Webex (not via email!).
+[Submit here](https://tools.sparkintegration.club/forms/joinspace/nwyadwh6l3oye5ikqhkfyzh73abwjf), open an issue or if you know my email address: send a message on Webex (not via email!).
