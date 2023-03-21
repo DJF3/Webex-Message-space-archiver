@@ -290,7 +290,7 @@ if downloadFiles not in ['no', 'info', 'images', 'files', 'image', 'file']:
     goExitError += "\n   **ERROR** the 'download' setting must be: 'no', 'images' or 'files'"
 if not myToken or len(myToken) < 55:
     goExitError += "\n   **ERROR** your token is not set or not long enough. You can also\n     create an environment variable \"WEBEX_ARCHIVE_TOKEN\" with your token."
-if len(myRoom) < 70 and mySearch != "":
+if len(myRoom) < 70 and mySearch == "":
     goExitError += "\n   **ERROR** your space ID is not set or not long enough\n    RUN this script with a search parameter (space name) to find your space ID"
 if not outputFileName or len(outputFileName) < 2:
     outputFileName = ""
