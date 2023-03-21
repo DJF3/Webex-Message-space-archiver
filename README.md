@@ -42,12 +42,12 @@ Example HTML file of an archived Webex space:
 
 * Archives all messages in a space
 * Find space ID with built in search function
-* Batch archiving with multiple config files & commandline parameters
+* Batch archiving with multiple config files & commandline parameters _NEW_
 * Deal with threaded messages
-* Support for automatic and manual DST configuration ('summertime')
-* Download space images, files or both (with msg file date)
+* Support for automatic and manual DST configuration ('summertime') _NEW_
+* Download images, files or both (with msg file date)
 * All files are organized: \spacenamefolder with subfolders for \files, \images, \avatars
-* Export space data to JSON or TXT file
+* Export space data to JSON and/or TXT file
 * Restrict messages by number of messages, number of days, from- date or from-to date
 * Display: messages grouped per month, with navigation at the top
 * Display: show full user names
@@ -57,7 +57,7 @@ Example HTML file of an archived Webex space:
 * Display: quoted or formatted text
 * Display: external users in different color (users with other domain)
 * Display: images in popup when clicked
-* Support for blurring email addresses and names
+* Support for blurring email addresses and names _NEW_
 * Print: just like it appears on the screen
 
 ## It doesn't:
@@ -65,7 +65,7 @@ Example HTML file of an archived Webex space:
 * Download whiteboards (unless you post a snapshot)
 * Download/display files shared in external Enterprise Content Management systems (Onedrive/Sharepoint)
 * Display reactions to messages (not accessible via API)
-* Mow your *neighbours* lawn
+* Mow your _neighbours_ lawn (I've tried)
 * Render cards
 
 ## NOTE:
