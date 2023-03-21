@@ -92,11 +92,11 @@ Example HTML file of an archived Webex space:
 | parameter |  |
 | ------------- | ------------- |
 | *nothing* | use standard configuration .ini file |
-| CONFIG_FILE | use non-standard configuration .ini file |
-| SEARCH_STRING | search for space name to get the space ID |
-| SPACE_ID | use this SPACE_ID with standard configuration .ini file |
-| CONFIG_FILE SPACE_ID | use non-standard configuration .ini file and provided SPACE_ID |
-| SPACE_ID CONFIG_FILE | use non-standard configuration .ini file and provided SPACE_ID |
+| CONFIG_FILE | use non-standard configuration .ini file<br>```testspace.ini``` |
+| SEARCH_STRING | search for space name to get the space ID<br>```ciscolive``` |
+| SPACE_ID | use this SPACE_ID with standard configuration .ini file<br>```Y2lzY29zcGFyazovL3VzL0lfS05FVy95b3Vfd291bGRfdHJ5X2hhaGE``` |
+| CONFIG_FILE SPACE_ID | use non-standard configuration .ini file _and_ provided SPACE_ID<br>```a combination of examples above``` |
+| SPACE_ID CONFIG_FILE | use non-standard configuration .ini file _and_ provided SPACE_ID |
 
 
 
