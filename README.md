@@ -1,6 +1,6 @@
 # Webex Space Archiver 
 
-**NEW: Important Release! v25** (check out new features in the [release notes](#releasenotes))
+**NEW: Important Release v30!** (check out new features in the [release notes](#releasenotes))
 
 [Features](#features)
 
