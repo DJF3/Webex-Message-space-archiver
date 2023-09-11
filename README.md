@@ -40,6 +40,7 @@ Example HTML file of an archived Webex space:
         
 # Features
 
+* Archive all spaces
 * Archives all messages in a space
 * Find space ID with built in search function
 * Batch archiving with multiple config files & commandline parameters _NEW_
@@ -92,6 +93,7 @@ Example HTML file of an archived Webex space:
 | parameter |  |
 | ------------- | ------------- |
 | *nothing* | use standard configuration .ini file |
+| ```DOWNLOAD_ALL``` | download all messages from all spaces |
 | CONFIG_FILE | use non-standard configuration .ini file<br>```testspace.ini``` |
 | SEARCH_STRING | search for space name to get the space ID<br>```ciscolive``` |
 | SPACE_ID | use this SPACE_ID with standard configuration .ini file<br>```Y2lzY29zcGFyazovL3VzL0lfS05FVy95b3Vfd291bGRfdHJ5X2hhaGE``` |
