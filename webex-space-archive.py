@@ -56,7 +56,9 @@ myErrorList = list()
 downloadAvatarCount = 1
 originalConfigFile = configFile
 myRoom = ""
+myRooms = dict()
 mySearch = ""
+downloadAll = False
 # below --> ini maxtotalmessages dateformat. Use %d,%m, %y and %Y, change the order / add slashes
 #           DON'T use dashes in the date format, only between 2 dates: WRONG: %d-%m-%Y
 #              correct examples: %Y/%m/%d, %y%m%d, %d%m%Y
@@ -86,6 +88,10 @@ if cl_count == 1 and "Y2lzY" in cl_args:
 elif cl_count == 1 and ".ini" in cl_args:
     configFile = cl_args
     print(f"    Alternate config file: {configFile}")
+#___ parameter: DOWNLOAD_ALL
+elif cl_count == 1 and "DOWNLOAD_ALL" in cl_args:
+    downloadAll = True
+    print(f"    Downloading all using default config")
 #___ parameter: space name search argument
 elif cl_count == 1:
     mySearch = cl_args
@@ -127,9 +133,9 @@ if os.path.isfile("./" + configFile):
         else:
             myToken = config['Archive Settings']['mytoken']
         if myRoom == "":  # No space id provided as command line parameter
-            if config.has_option('Archive Settings', 'myroom'):  # Added to deal with old naming in .ini files
+            if config.has_option('Archive Settings', 'myroom') and config['Archive Settings']['myroom'] != '__YOUR_SPACE_ID_HERE__':  # Added to deal with old naming in .ini files
                 myRoom = config['Archive Settings']['myroom']
-            if config.has_option('Archive Settings', 'myspaceid'):  # Replacing the old 'myroom' setting
+            if config.has_option('Archive Settings', 'myspaceid') and config['Archive Settings']['myspaceid'] != '__YOUR_SPACE_ID_HERE__':  # Replacing the old 'myroom' setting
                 myRoom = config['Archive Settings']['myspaceid']
         outputFileName = config['Archive Settings']['outputfilename']
         maxTotalMessages = config['Archive Settings']['maxtotalmessages']
@@ -290,7 +296,7 @@ if downloadFiles not in ['no', 'info', 'images', 'files', 'image', 'file']:
     goExitError += "\n   **ERROR** the 'download' setting must be: 'no', 'images' or 'files'"
 if not myToken or len(myToken) < 55:
     goExitError += "\n   **ERROR** your token is not set or not long enough. You can also\n     create an environment variable \"WEBEX_ARCHIVE_TOKEN\" with your token."
-if len(myRoom) < 70 and mySearch == "":
+if len(myRoom) < 70 and mySearch == "" and downloadAll == False:
     goExitError += "\n   **ERROR** your space ID is not set or not long enough\n    RUN this script with a search parameter (space name) to find your space ID"
 if not outputFileName or len(outputFileName) < 2:
     outputFileName = ""
@@ -333,11 +339,10 @@ if len(goExitError) > 76:   # length goExitError = 66. If error: it is > 76 char
     beep(3)
     exit()
 
-
 # ----------------------------------------------------------------------------------------
 #   HTML header code containing images, styling info (CSS)
 # ----------------------------------------------------------------------------------------
-htmlheader = """<!DOCTYPE html><html><head><meta charset="utf-8"/>
+htmlheader_template = """<!DOCTYPE html><html><head><meta charset="utf-8"/>
 <script>
 function show(yearnr)
 {
@@ -1313,7 +1318,7 @@ def stopTimerFiledownload():
 
 # ----------------------------------------------------------------------------------------
 # ===== SEARCH SPACES: If parameter provided, use it to search in your spaces, display result and exit
-if mySearch != "":
+if mySearch != "" or downloadAll == True:
     spaceSearchResult_group, spaceSearchResult_direct = get_searchspaces(myToken, mySearch)
     if len(spaceSearchResult_group.items()) > 0:
         print("___________________________ group _______________________\n")
@@ -1325,7 +1330,26 @@ if mySearch != "":
             print(f"  {value}\n    id:      {key}")
     if len(spaceSearchResult_group.items()) + len(spaceSearchResult_direct.items()) > 0:
         print("_________________________________________________________\n\n")
-    exit()
+    if downloadAll == True:
+        myRooms = spaceSearchResult_group | spaceSearchResult_direct
+    else:
+        exit()
+
+# =====  GET SPACE NAME: If we got only one room to download ====================
+#   used for the space name in the header and optionally the output foldername
+if myRoom != "":
+    print(myRoom)
+    startTimer()
+    try:
+        roomName = get_roomname(myToken, myRoom)
+        print(f" #1 --- Get SPACE NAME: '{roomName}'")
+    except Exception as e:
+        print(" #1 --- get SPACE NAME: **ERROR** getting space name")
+        print(f"             Error message: {e}\n\n")
+        beep(3)
+        exit()
+    stopTimer("get space name", 0)
+    myRooms[myRoom] = roomName
 
 
 # =====  CREATE TABLE with DST dates for my LOCAL TIME ==========================
@@ -1345,627 +1369,620 @@ if dst_start != "":
         utc_offset['summer'], utc_offset['winter'] = utc_offset['winter'], utc_offset['summer']
 
 
-# =====  GET SPACE NAME ========================================================
-#   used for the space name in the header and optionally the output foldername
-startTimer()
-try:
-    roomName = get_roomname(myToken, myRoom)
-    print(f" #1 --- Get SPACE NAME: '{roomName}'")
-except Exception as e:
-    print(" #1 --- get SPACE NAME: **ERROR** getting space name")
-    print(f"             Error message: {e}\n\n")
-    beep(3)
-    exit()
-stopTimer("get space name", 0)
-# If no outputFileName has been configured: use the space name
-if outputFileName == "":
-    outputFileName = format_filename(roomName)
-myOutputFolder = outputFileName
+for myRoom, roomName in myRooms.items():
+    htmlheader = htmlheader_template
+
+    # If no outputFileName has been configured: use the space name
+    if outputFileName == "" or downloadAll == True:
+        outputFileName = format_filename(roomName)
+    myOutputFolder = outputFileName
 
 
-# =====  GET MESSAGES ==========================================================
-startTimer()
-print(" #2 --- Get MESSAGES")
-try:
-    WebexMessages = get_messages(myToken, myRoom, max_messages)
-except Exception as e:
-    print(" **ERROR** STEP #2: getting Messages")
-    print(f"             Error message: {e}\n\n")
-    beep(3)
-    exit()
-if len(WebexMessages) == 0:  # for spaces that have no messages (anymore)
-    print(" **ERROR** STEP #2: getting Messages")
-    print(f"             No messages found\n\n")
-    beep(3)
-    exit()
-stopTimer("get messages", 0)
+    # =====  GET MESSAGES ==========================================================
+    startTimer()
+    print(" #2 --- Get MESSAGES")
+    try:
+        WebexMessages = get_messages(myToken, myRoom, max_messages)
+    except Exception as e:
+        print(" **ERROR** STEP #2: getting Messages")
+        print(f"             Error message: {e}\n\n")
+        beep(3)
+        exit()
+    if len(WebexMessages) == 0:  # for spaces that have no messages (anymore)
+        print(" **ERROR** STEP #2: getting Messages")
+        print(f"             No messages found\n\n")
+        beep(3)
+        continue
+    stopTimer("get messages", 0)
 
 
-# ===== CREATE USERLIST ========================================================
-#   Collect only userId's of users who wrote a message. For those users we will
-#   retrieve details & download/link avatars
-startTimer()
-uniqueUserIds = list()
-for myUser in WebexMessages:
-    if myUser['personId'] not in uniqueUserIds and "xxXXxx" not in myUser['personId']:
-        uniqueUserIds.append(myUser['personId'])
-stopTimer("get unique user ids", 0)
+    # ===== CREATE USERLIST ========================================================
+    #   Collect only userId's of users who wrote a message. For those users we will
+    #   retrieve details & download/link avatars
+    startTimer()
+    uniqueUserIds = list()
+    for myUser in WebexMessages:
+        if myUser['personId'] not in uniqueUserIds and "xxXXxx" not in myUser['personId']:
+            uniqueUserIds.append(myUser['personId'])
+    stopTimer("get unique user ids", 0)
 
 
-# =====  GET MEMBER NAMES ======================================================
-# myMembers used # of space members (stats).
-# myMemberList is used to get the displayName of users (msg only show email address - personEmail)
-startTimer()
-print(" #3 --- Get MEMBER List")  # Put ALL members in a dictionary that contains: "email + fullname"
-try:
-    myMembers = get_memberships(myToken, myRoom, 800)
-    for members in myMembers:
-        try:
-            myMemberList[str(members['personEmail'])] = str(members['personDisplayName'])
-        except Exception as e:  # IF there's no personDisplayName, use email
-            myMemberList[str(members['personEmail'])] = str(members['personEmail'])
-except Exception as e:
-    print(" **ERROR** STEP #3: getting Memberlist (email address)")
-    print(f"             Error message: {e}")
-    beep(1)
-stopTimer("get memberlist", 0)
-
-
-# =====  CREATE FOLDERS FOR ATTACHMENTS & AVATARS ==============================
-startTimer()
-print(f" #4a--- Create FOLDER for HTML. Download files? {downloadFiles}")
-if not os.path.exists(myOutputFolder):
-    print(f"          folder does NOT exist: {myOutputFolder}")
-else:   # check if folder-01 exists, if yes, check if folder-02 exists, etc.
-    folderCounter = 1
-    print(f"          folder EXISTS  : {myOutputFolder}")
-    while os.path.exists(myOutputFolder + "-" + "{:02d}".format(folderCounter)):
-        folderCounter += 1
-    myOutputFolder += "-" + "{:02d}".format(folderCounter)
-print(f"          Output folder  : {myOutputFolder}")
-os.makedirs(myOutputFolder)
-if userAvatar == "download":
-    os.makedirs(myOutputFolder + "/avatars/")
-if "file" in downloadFiles:
-    os.makedirs(myOutputFolder + "/files/")
-    os.makedirs(myOutputFolder + "/images/")
-if "image" in downloadFiles:
-    os.makedirs(myOutputFolder + "/images/")
-stopTimer("create folders", 0)
-
-
-# =====  GET MEMBER AVATARS ====================================================
-startTimer()
-if userAvatar == "link" or userAvatar == "download":
-    print(" #4b--- MEMBER Avatars: collect avatar Data (" + str(len(uniqueUserIds)) + ")  ", end='', flush=True)
-    userAvatarDict = dict()  # --> userAvatarDict[your@email.com] = "https://webex_message_avatarurl"
-    x = 0
-    y = len(uniqueUserIds)
-    if 50 > y:
-        chunksize = y
-    else:
-        chunksize = 50
-    if y < 50:
-        chunksize = y
-    for i in range(x, y, chunksize):  # - LOOPING OVER MemberDataList in chunks of xx
-        x = i
-        person_list = get_persondetails(myToken, uniqueUserIds[x:x + chunksize])
-        print(".", end='', flush=True)  # Progress indicator
-        for persondetails in person_list:
+    # =====  GET MEMBER NAMES ======================================================
+    # myMembers used # of space members (stats).
+    # myMemberList is used to get the displayName of users (msg only show email address - personEmail)
+    startTimer()
+    print(" #3 --- Get MEMBER List")  # Put ALL members in a dictionary that contains: "email + fullname"
+    try:
+        myMembers = get_memberships(myToken, myRoom, 800)
+        for members in myMembers:
             try:
-                userAvatarDict[persondetails['id']] = persondetails['avatar'].replace("~1600", "~80")
-            except:
-                print('', end='')
-    print(".", flush=False)
-stopTimer("get avatars", 0)
+                myMemberList[str(members['personEmail'])] = str(members['personDisplayName'])
+            except Exception as e:  # IF there's no personDisplayName, use email
+                myMemberList[str(members['personEmail'])] = str(members['personEmail'])
+    except Exception as e:
+        print(" **ERROR** STEP #3: getting Memberlist (email address)")
+        print(f"             Error message: {e}")
+        beep(1)
+    stopTimer("get memberlist", 0)
 
-startTimer()
-if userAvatar == "link" or userAvatar == "download":
-    print(" #4c--- MEMBER Avatars: downloading avatar files for " + str(len(userAvatarDict)) + " members  ")  #, end='', flush=True)
+
+    # =====  CREATE FOLDERS FOR ATTACHMENTS & AVATARS ==============================
+    startTimer()
+    print(f" #4a--- Create FOLDER for HTML. Download files? {downloadFiles}")
+    if not os.path.exists(myOutputFolder):
+        print(f"          folder does NOT exist: {myOutputFolder}")
+    else:   # check if folder-01 exists, if yes, check if folder-02 exists, etc.
+        folderCounter = 1
+        print(f"          folder EXISTS  : {myOutputFolder}")
+        while os.path.exists(myOutputFolder + "-" + "{:02d}".format(folderCounter)):
+            folderCounter += 1
+        myOutputFolder += "-" + "{:02d}".format(folderCounter)
+    print(f"          Output folder  : {myOutputFolder}")
+    os.makedirs(myOutputFolder)
     if userAvatar == "download":
-        download_avatars(userAvatarDict)
-    # print("")
-stopTimer("download avatars", 0)
+        os.makedirs(myOutputFolder + "/avatars/")
+    if "file" in downloadFiles:
+        os.makedirs(myOutputFolder + "/files/")
+        os.makedirs(myOutputFolder + "/images/")
+    if "image" in downloadFiles:
+        os.makedirs(myOutputFolder + "/images/")
+    stopTimer("create folders", 0)
 
 
-# =====  GET MY DETAILS ========================================================
-startTimer()
-try:
-    myOwnDetails = get_me(myToken)
-    myEmail = "".join(myOwnDetails['emails'])
-    myName = myOwnDetails['displayName']
-    myDomain = myEmail.split("@")[1]
-    print(f" #5 --- Get my details: {myEmail}")
-except Exception as e:
-    print(f"\n #5 --- Get my details: **ERROR** : {e}\n\n myOwnDetails data retrieved: \n{myOwnDetails}")
-stopTimer("get my details", 0)
-
-
-# =====  SET/CREATE VARIABLES ==================================================
-tocList = ""
-statTotalFiles = 0
-statTotalImages = 0
-statTotalFilesSize = 0
-statTotalImagesSize = 0
-statTotalMessages = len(WebexMessages)
-statTotalMentions = 0
-myDomainStats = dict()
-statMessageMonth = dict()
-previousEmail = ""
-previousMonth = ""
-previousMsgCreated = ""
-TimezoneName = str(time.tzname[time.localtime().tm_isdst])
-
-
-# ======  GENERATE HTML HEADER =================================================
-#
-print(f" #6 --- Generate HTML header")
-configFileInfo = ""
-if configFile != originalConfigFile:
-    configFileInfo = f"Config file: <span style='color:yellow'>{configFile}</span>"
-dst_msg = "NO"
-if dst_start != "":
-    # below: changing dst_start/stop to string
-    dst_msg = (str(dst_start) + "/" + str(dst_stop)).replace(" ", "").replace("[", "").replace("]", "").replace("'", "")
-blur_msg = "YES"
-if blurring == "":
-    blur_msg = "NO"
-outputjson_msg = outputToJson.replace("yes", "json/txt").replace("both", "json/txt")
-htmlheader += f"<div class='cssRoomName'>   {roomName}&nbsp;&nbsp;&nbsp;<br><span style='float:left;margin-top:8px;padding-bottom:11px;"
-htmlheader += f"font-size:10px;color:#fff'> CREATED: <span style='color:yellow'>{currentDate}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Generated by: <span "
-htmlheader += f"style='color:yellow'>{myName}</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  {configFileInfo}"
-htmlheader += f"&nbsp;&nbsp;&nbsp; version:  {version}&nbsp;&nbsp;&nbsp;<br>Sort old-new: <span style='color:yellow'>"
-htmlheader += str(sortOldNew).replace("True", "yes (default)").replace("False", "no") + f"</span> &nbsp;&nbsp; Max messages:"
-htmlheader += f"<span style='color:yellow'> {maxMessageString} </span>&nbsp;&nbsp; File Download: <span style='color:yellow'>{downloadFiles.upper()}</span>"
-htmlheader += f"&nbsp;&nbsp; Avatar: <span style='color:yellow'>{userAvatar.upper()}</span>&nbsp;&nbsp; Message timezone: <span style='color:yellow'>{TimezoneName}</span>"
-htmlheader += f"&nbsp;&nbsp; DST configured: <span style='color:yellow'>{dst_msg}</span>"
-htmlheader += f"&nbsp;&nbsp; Output: <span style='color:yellow'>{outputjson_msg}</span>"
-htmlheader += f"&nbsp;&nbsp; Blurring: <span style='color:yellow'>{blur_msg}</span></span></div><br>"
-
-
-# ====== GENERATE FINAL HTML ===================================================
-#  for all messages (and optionally a .txt file with all messages)
-#
-startTimer()  # for generating the full HTML file
-
-# ___ first create msg order table
-startTimer()
-sortedMessages = sorted(WebexMessages, key=lambda i: i['created'], reverse=False)
-stopTimer("sort WebexMessages", 0)
-
-startTimer()
-# --- Message order table: create
-msgOrderTable, missing_parent_msglist = create_threading_order_table(sortedMessages)
-if len(missing_parent_msglist) > 0:
-    WebexMessages += missing_parent_msglist
-    sortedMessages = sorted(WebexMessages, key=lambda i: i['created'], reverse=False)
-
-# --- Sort Messages: process all msgs defined by the "threading index"-table order
-if sortOldNew:
-    sortedMsgOrderTable = sorted(msgOrderTable, key=lambda x: (float(x), -int(float(x))))
-else:
-    sortedMsgOrderTable = sorted(msgOrderTable, key=lambda x: (-int(float(x)), float(x)))
-stopTimer("create threading order table", 0)
-
-print(f" #7 --- Generate HTML code for {len(sortedMsgOrderTable)} messages" + (" AND downloading all " + downloadFiles if downloadFiles in ['images', 'files', 'image', 'file'] else ""))
-htmldata = ""
-textOutput = ""
-if outputToText:
-    textOutput += f"------------------------------------------------------------\n {roomName}\n------------------------------------------------------------\n"
-    textOutput += f"CREATED:        {currentDate}\nFile Download:  {downloadFiles.upper()}\nGenerated by:   {myName}\nSort old-new:   "
-    textOutput += str(sortOldNew).replace("True", "yes (default)").replace("False", "no") + f"\nMax messages:   {maxMessageString}\nAvatar:"
-    textOutput += f"         {userAvatar} \nversion:        {version} \nTimezone:       {TimezoneName}\nDST configured:     "
-    if dst_start == "":
-        textOutput += "No\n"
-    else:
-        textOutput += "Yes\n"
-
-
-# ====== WRITE JSON data to a FILE =============================================
-#   (optional) Write JSON to a FILE to be used as input (not using the Webex Message APIs)
-startTimer()
-if outputToJson == "yes" or outputToJson == "both" or outputToJson == "json":
-    with open(myOutputFolder + "/" + outputFileName + ".json", 'w', encoding='utf-8') as f:
-        json.dump(WebexMessages, f)
-stopTimer("output to json", 0)
-
-
-# Progress bar:
-mycounter = 0
-download_stats = ""
-progress_steps = int(len(sortedMsgOrderTable) / 20)  # 0.26d don't show total msg downloaded but the actual number of msg
-if progress_steps < 1:
-    progress_steps = 1  # Fix issue with low number of maxtotalmessages v0.22
-# --- PROCESS EVERY MESSAGE ----------------------------------------------------
-for index, key in enumerate(sortedMsgOrderTable):
-    mycounter += 1
-    current_step = mycounter / progress_steps
-    if (current_step - int(current_step)) == 0:
-        current_step = int(current_step)
-        sys.stdout.write('\r')
-        # the exact output you're looking for:
-        sys.stdout.write("          [%-20s] %d%%" % ('=' * current_step, 5 * current_step))
-        sys.stdout.flush()
-    # find matching message ID in message list
-    msg = next(item for item in WebexMessages if item["id"] == msgOrderTable[key])
-    try:
-        previousitem = float(sortedMsgOrderTable[index - 1])
-        currentitem = float(sortedMsgOrderTable[index])
-        if previousitem - round(previousitem) == 0 and currentitem - round(currentitem) > 0:
-            # START of threaded message!
-            threadstart = True
+    # =====  GET MEMBER AVATARS ====================================================
+    startTimer()
+    if userAvatar == "link" or userAvatar == "download":
+        print(" #4b--- MEMBER Avatars: collect avatar Data (" + str(len(uniqueUserIds)) + ")  ", end='', flush=True)
+        userAvatarDict = dict()  # --> userAvatarDict[your@email.com] = "https://webex_message_avatarurl"
+        x = 0
+        y = len(uniqueUserIds)
+        if 50 > y:
+            chunksize = y
         else:
-            threadstart = False
-        if currentitem - round(currentitem) > 0:
-            threaded_message = True
-        else:
-            threaded_message = False
-    except:
-        threadstart = False
-        threaded_message = False
-
-    # --- continue processing messages
-    if len(msg) < 5:
-        print("_EMPTYmessage_")
-        beep(1)  # troubleshooting thing (to see, eh, hear how many "empty messages" are found)
-        continue        # message empty
-
-    data_text = ""
-    # --- if msg was updated: add 'Edited' in date
-    if "updated" in msg:
-        data_msg_was_edited = True
-        data_created = convertDate(str(msg['created']), "%A %H:%M      (%b %d, %Y)") + "   -  edited at " + convertDate(str(msg['updated']), "%H:%M  %b %d")
-    else:
-        data_msg_was_edited = False
-        data_created = convertDate(str(msg['created']), "%A %H:%M      (%b %d, %Y)")
-    # --- HTML in message? Deal with markdown
-    if "html" in msg:
-        # --- Check if there are Markdown hyperlinks [linktext](www.cisco.com) as these look very different
-        if "sparkBase.clickEventHandler(event)" in str(msg['html']):
-            data_text = convertMarkdownURL(str(msg['html']), 1)
-            data_text = convertMarkdownURL(data_text, 2)
-        else:
-            data_text = convertURL(str(msg['html']))
-    elif "text" in msg:
-        data_text = convertURL(msg['text'])
-        data_text = data_text.replace("<script", "<pre>&lt;")  # --- Replace script in 'text' msg (stopping HTML generation) - 0.20b
-        if "<code>" in data_text:
-            if "</code>" not in data_text:
-                data_text += "</code>"
-        data_text = data_text.replace("<", "&lt;").replace(">", "&gt;")  # make sure html in 'text' is not interpreted (v25) except for hyperlinks
-        data_text = data_text.replace("&lt;a href", "<a href").replace("&lt;/a&gt;", "</a>").replace("blank'&gt;", "blank'>")
-        data_text = str(data_text).replace("\n", "<br>")  # replace \n with <br> - 0.22d3
-    if data_text == "" and 'files' not in msg and 'mentionedPeople' not in msg:
-        # empty text without mentions or attached images/files: SKIP
-        print("_EMPTYmessage_")
-        beep(1)  # troubleshooting thing (to see, eh, hear how many "empty messages" are found)
-        continue
-    try:  # Put email & name in variable
-        data_email = str(msg['personEmail'])
-        data_userid = str(msg['personId'])
-        data_name = myMemberList[msg['personEmail']]
-    except:
-        data_name = data_email
-    if '@' in data_email and "error.com" not in data_email:
-        domain = str(data_email.split('@')[1])
-        myDomainStats[domain] = myDomainStats.get(domain, 0) + 1
-    messageYear, messageMonth, messageMonthNr = get_monthday(msg['created'])
-    # ====== GENERATE MONTH STATISTICS
-    statMessageMonthKey = messageYear + " - " + messageMonthNr + "-" + messageMonth
-    #  IF message is THREADED _AND_ the key doesn't exist: skip
-    # >>> below: if/print/else statement are added
-    if threaded_message and statMessageMonthKey not in statMessageMonth:
-        pass
-    else:
-        statMessageMonth[statMessageMonthKey] = statMessageMonth.get(statMessageMonthKey, 0) + 1
-    if messageMonth != previousMonth and not threaded_message:
-        htmldata += f"<div class='cssNewMonth' id='{statMessageMonthKey}'>   {messageYear}    <span style='color:#C3C4C7'>" + messageMonth + "</span><span style='float:right; font-size:56px; color:lightgrey;margin-right:15px; padding-top:0px;'><a href='#top' style='text-decoration:none;color:inherit;'>▲</a></span></div>"
-        if outputToText:  # for .txt output
-            textOutput += f"\n\n---------- {messageYear}    {messageMonth} ------------------------------\n\n"
-    # ====== if PREVIOUS email equals current email, then skip header
-    if threaded_message:  # ___________________________________ start thread ______________________________
-        htmldata += "<div class='css_message_thread'>"
-    else:
-        htmldata += "<div class='css_message'>"
-
-    # ====== AVATAR: + msg header: display or not
-    if (data_email != previousEmail) or (data_email == previousEmail and timedifference(msg["created"], previousMsgCreated) > 60) or (data_msg_was_edited):
-        if userAvatar == "link" and data_userid in userAvatarDict:
-            htmldata += f"<img src='{userAvatarDict[data_userid]}' class='avatarCircle'  width='36px' height='36px'/>"
-        elif userAvatar == "download" and data_userid in userAvatarDict:
-            htmldata += f"<img src='avatars/" + data_userid + ".jpg' class='avatarCircle'  width='36px' height='36px'/>"
-        else:  # User that may not exist anymore --> use email as name
-            if data_name == data_email:
-                htmldata += f"<div id='avatarCircle'>{data_name[0:2].upper()}</div>"
-            else:
-                # show circle with initials instead of avatar
+            chunksize = 50
+        if y < 50:
+            chunksize = y
+        for i in range(x, y, chunksize):  # - LOOPING OVER MemberDataList in chunks of xx
+            x = i
+            person_list = get_persondetails(myToken, uniqueUserIds[x:x + chunksize])
+            print(".", end='', flush=True)  # Progress indicator
+            for persondetails in person_list:
                 try:
-                    htmldata += "<div id='avatarCircle'>" + data_name.split(" ")[0][0].upper() + data_name.split(" ")[1][0].upper() + "</div><div class='css_message'>"
-                except:  # Sometimes there's no "first/last" name. If one word, take the first 2 characters.
-                    htmldata += "<div id='avatarCircle'>" + data_name[0:2].upper() + "</div>"
+                    userAvatarDict[persondetails['id']] = persondetails['avatar'].replace("~1600", "~80")
+                except:
+                    print('', end='')
+        print(".", flush=False)
+    stopTimer("get avatars", 0)
 
-        msgDomain = data_email.split("@")[1]    # Get message sender domain
-        if myDomain == msgDomain:               # If domain <> own domain, use different color
-            htmldata += f"<span class='css_email{blurring}' title='{data_email}'>{data_name}</span>"
-        else:
-            htmldata += "<span class='css_email" + blurring + "' title='" + data_email + "'>" + data_name + "</span>   <span class='css_email_external" + blurring + "'>(@" + data_email.split("@")[1] + ")</span>"
-        htmldata += f"<span class='css_created'>{data_created}</span>"
-    else:
-        htmldata += "<div class='css_message'>"
+    startTimer()
+    if userAvatar == "link" or userAvatar == "download":
+        print(" #4c--- MEMBER Avatars: downloading avatar files for " + str(len(userAvatarDict)) + " members  ")  #, end='', flush=True)
+        if userAvatar == "download":
+            download_avatars(userAvatarDict)
+        # print("")
+    stopTimer("download avatars", 0)
 
-    if outputToText:  # for .txt output
-        if blurring != "":  # For blurring
-            data_email = "_____@_____.__"
-        if threaded_message:  # add ">>" to text output to indicate a thread v0.23
-            textOutput += convertDate(str(msg['created']), "%A %H:%M      (%b %d, %Y)") + "  >> " + data_email + ": "
-        else:
-            textOutput += convertDate(str(msg['created']), "%A %H:%M      (%b %d, %Y)") + "  " + data_email + ": "
 
-    # ====== DEAL WITH MENTIONS IN A MESSAGE
-    if 'mentionedPeople' in msg:
-        try:
-            statTotalMentions += 1
-            for item in msg['mentionedPeople']:
-                texttoreplace = "<spark-mention data-object-type=\"person\" data-object-id=\"" + item + "\">"
-                data_text = data_text.replace(texttoreplace, "<span class='atmention" + blurring + "'>@")
-            data_text = data_text.replace("</spark-mention>", "</span>")
-        except:
-            print(" **ERROR** processing mentions, don't worry, I will continue")
-    if 'mentionedGroups' in msg:
-        try:
-            statTotalMentions += 1
-            for item in msg['mentionedGroups']:
-                texttoreplace = "<spark-mention data-object-type=\"groupMention\" data-group-type=\"" + item + "\">"
-                data_text = data_text.replace(texttoreplace, "<span style='color:red;display:inline;'>@")
-            data_text = data_text.replace("</spark-mention>", "</span>")
-        except:
-            print(" **ERROR** processing mentions, don't worry, I will continue")
-    # check if msg is a card. If yes: add "cannot display" message
+    # =====  GET MY DETAILS ========================================================
+    startTimer()
     try:
-        if "contentType" in msg["attachments"][0]:
-            is_card = True
-    except:
-        is_card = False
-    if is_card:
-        data_text = "<span class='card_class'>&nbsp;<span style='color:red'>Card</span>&nbsp; content cannot be displayed in this archive&nbsp;</span>&nbsp;  " + data_text
-    htmldata += "<div class='css_messagetext'>" + data_text
-    if outputToText and 'text' in msg:  # for .txt output
-        if msg['text'] == "":
-            myErrorList.append("processing msgs: msg WITH html WITHOUT text? html: " + msg['html'] + " -- msg id: " + msg['id'])
-        p = re.compile(r'<.*?>')
-        textOutput += p.sub('', msg['text']).replace("\"", "'").replace("\n", " ").replace("\r", " ")
-        textOutput += "\n\r"
-    if outputToText and 'text' not in msg and 'files' not in msg:
-        textOutput += "\n\r"
+        myOwnDetails = get_me(myToken)
+        myEmail = "".join(myOwnDetails['emails'])
+        myName = myOwnDetails['displayName']
+        myDomain = myEmail.split("@")[1]
+        print(f" #5 --- Get my details: {myEmail}")
+    except Exception as e:
+        print(f"\n #5 --- Get my details: **ERROR** : {e}\n\n myOwnDetails data retrieved: \n{myOwnDetails}")
+    stopTimer("get my details", 0)
 
-    # ====== DEAL WITH FILE ATTACHMENTS IN A MESSAGE
-    if 'files' in msg:
-        startTimerFiledownload()
-        if data_text != "":
-            htmldata += "<br>"
-        if downloadFiles == "no":   # download=no  - only show "file attachment", no details whatsoever
-            for i in range(len(msg['files'])):
-                htmldata += f"<br><div id='fileicon'></div><span style='line-height:32px;'> attached_file</span>"
-                statTotalFiles += 1
-            if outputToText:
-                textOutput += f" <File Attachment> \n\n"  # v26
-        else:  # download=info/images/files
-            myFiles = process_Files(msg['files'], msg['created'])
-            # SORT attached files by <files> _then_ <images>
-            myFiles.sort(key=lambda x: x.split("###")[0].split(".")[-1] in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif'])
-            splitFilesImages = ""
-            for filename in myFiles:
-                # IMAGE POPUP
-                filename, filesize = filename.split("###")
-                if int(filesize) == 0:
-                    filesize_fancy = "0 B"
+
+    # =====  SET/CREATE VARIABLES ==================================================
+    tocList = ""
+    statTotalFiles = 0
+    statTotalImages = 0
+    statTotalFilesSize = 0
+    statTotalImagesSize = 0
+    statTotalMessages = len(WebexMessages)
+    statTotalMentions = 0
+    myDomainStats = dict()
+    statMessageMonth = dict()
+    previousEmail = ""
+    previousMonth = ""
+    previousMsgCreated = ""
+    TimezoneName = str(time.tzname[time.localtime().tm_isdst])
+
+
+    # ======  GENERATE HTML HEADER =================================================
+    #
+    print(f" #6 --- Generate HTML header")
+    configFileInfo = ""
+    if configFile != originalConfigFile:
+        configFileInfo = f"Config file: <span style='color:yellow'>{configFile}</span>"
+    dst_msg = "NO"
+    if dst_start != "":
+        # below: changing dst_start/stop to string
+        dst_msg = (str(dst_start) + "/" + str(dst_stop)).replace(" ", "").replace("[", "").replace("]", "").replace("'", "")
+    blur_msg = "YES"
+    if blurring == "":
+        blur_msg = "NO"
+    outputjson_msg = outputToJson.replace("yes", "json/txt").replace("both", "json/txt")
+    htmlheader += f"<div class='cssRoomName'>   {roomName}&nbsp;&nbsp;&nbsp;<br><span style='float:left;margin-top:8px;padding-bottom:11px;"
+    htmlheader += f"font-size:10px;color:#fff'> CREATED: <span style='color:yellow'>{currentDate}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Generated by: <span "
+    htmlheader += f"style='color:yellow'>{myName}</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  {configFileInfo}"
+    htmlheader += f"&nbsp;&nbsp;&nbsp; version:  {version}&nbsp;&nbsp;&nbsp;<br>Sort old-new: <span style='color:yellow'>"
+    htmlheader += str(sortOldNew).replace("True", "yes (default)").replace("False", "no") + f"</span> &nbsp;&nbsp; Max messages:"
+    htmlheader += f"<span style='color:yellow'> {maxMessageString} </span>&nbsp;&nbsp; File Download: <span style='color:yellow'>{downloadFiles.upper()}</span>"
+    htmlheader += f"&nbsp;&nbsp; Avatar: <span style='color:yellow'>{userAvatar.upper()}</span>&nbsp;&nbsp; Message timezone: <span style='color:yellow'>{TimezoneName}</span>"
+    htmlheader += f"&nbsp;&nbsp; DST configured: <span style='color:yellow'>{dst_msg}</span>"
+    htmlheader += f"&nbsp;&nbsp; Output: <span style='color:yellow'>{outputjson_msg}</span>"
+    htmlheader += f"&nbsp;&nbsp; Blurring: <span style='color:yellow'>{blur_msg}</span></span></div><br>"
+
+
+    # ====== GENERATE FINAL HTML ===================================================
+    #  for all messages (and optionally a .txt file with all messages)
+    #
+    startTimer()  # for generating the full HTML file
+
+    # ___ first create msg order table
+    startTimer()
+    sortedMessages = sorted(WebexMessages, key=lambda i: i['created'], reverse=False)
+    stopTimer("sort WebexMessages", 0)
+
+    startTimer()
+    # --- Message order table: create
+    msgOrderTable, missing_parent_msglist = create_threading_order_table(sortedMessages)
+    if len(missing_parent_msglist) > 0:
+        WebexMessages += missing_parent_msglist
+        sortedMessages = sorted(WebexMessages, key=lambda i: i['created'], reverse=False)
+
+    # --- Sort Messages: process all msgs defined by the "threading index"-table order
+    if sortOldNew:
+        sortedMsgOrderTable = sorted(msgOrderTable, key=lambda x: (float(x), -int(float(x))))
+    else:
+        sortedMsgOrderTable = sorted(msgOrderTable, key=lambda x: (-int(float(x)), float(x)))
+    stopTimer("create threading order table", 0)
+
+    print(f" #7 --- Generate HTML code for {len(sortedMsgOrderTable)} messages" + (" AND downloading all " + downloadFiles if downloadFiles in ['images', 'files', 'image', 'file'] else ""))
+    htmldata = ""
+    textOutput = ""
+    if outputToText:
+        textOutput += f"------------------------------------------------------------\n {roomName}\n------------------------------------------------------------\n"
+        textOutput += f"CREATED:        {currentDate}\nFile Download:  {downloadFiles.upper()}\nGenerated by:   {myName}\nSort old-new:   "
+        textOutput += str(sortOldNew).replace("True", "yes (default)").replace("False", "no") + f"\nMax messages:   {maxMessageString}\nAvatar:"
+        textOutput += f"         {userAvatar} \nversion:        {version} \nTimezone:       {TimezoneName}\nDST configured:     "
+        if dst_start == "":
+            textOutput += "No\n"
+        else:
+            textOutput += "Yes\n"
+
+
+    # ====== WRITE JSON data to a FILE =============================================
+    #   (optional) Write JSON to a FILE to be used as input (not using the Webex Message APIs)
+    startTimer()
+    if outputToJson == "yes" or outputToJson == "both" or outputToJson == "json":
+        with open(myOutputFolder + "/" + outputFileName + ".json", 'w', encoding='utf-8') as f:
+            json.dump(WebexMessages, f)
+    stopTimer("output to json", 0)
+
+
+    # Progress bar:
+    mycounter = 0
+    download_stats = ""
+    progress_steps = int(len(sortedMsgOrderTable) / 20)  # 0.26d don't show total msg downloaded but the actual number of msg
+    if progress_steps < 1:
+        progress_steps = 1  # Fix issue with low number of maxtotalmessages v0.22
+    # --- PROCESS EVERY MESSAGE ----------------------------------------------------
+    for index, key in enumerate(sortedMsgOrderTable):
+        mycounter += 1
+        current_step = mycounter / progress_steps
+        if (current_step - int(current_step)) == 0:
+            current_step = int(current_step)
+            sys.stdout.write('\r')
+            # the exact output you're looking for:
+            sys.stdout.write("          [%-20s] %d%%" % ('=' * current_step, 5 * current_step))
+            sys.stdout.flush()
+        # find matching message ID in message list
+        msg = next(item for item in WebexMessages if item["id"] == msgOrderTable[key])
+        try:
+            previousitem = float(sortedMsgOrderTable[index - 1])
+            currentitem = float(sortedMsgOrderTable[index])
+            if previousitem - round(previousitem) == 0 and currentitem - round(currentitem) > 0:
+                # START of threaded message!
+                threadstart = True
+            else:
+                threadstart = False
+            if currentitem - round(currentitem) > 0:
+                threaded_message = True
+            else:
+                threaded_message = False
+        except:
+            threadstart = False
+            threaded_message = False
+
+        # --- continue processing messages
+        if len(msg) < 5:
+            print("_EMPTYmessage_")
+            beep(1)  # troubleshooting thing (to see, eh, hear how many "empty messages" are found)
+            continue        # message empty
+
+        data_text = ""
+        # --- if msg was updated: add 'Edited' in date
+        if "updated" in msg:
+            data_msg_was_edited = True
+            data_created = convertDate(str(msg['created']), "%A %H:%M      (%b %d, %Y)") + "   -  edited at " + convertDate(str(msg['updated']), "%H:%M  %b %d")
+        else:
+            data_msg_was_edited = False
+            data_created = convertDate(str(msg['created']), "%A %H:%M      (%b %d, %Y)")
+        # --- HTML in message? Deal with markdown
+        if "html" in msg:
+            # --- Check if there are Markdown hyperlinks [linktext](www.cisco.com) as these look very different
+            if "sparkBase.clickEventHandler(event)" in str(msg['html']):
+                data_text = convertMarkdownURL(str(msg['html']), 1)
+                data_text = convertMarkdownURL(data_text, 2)
+            else:
+                data_text = convertURL(str(msg['html']))
+        elif "text" in msg:
+            data_text = convertURL(msg['text'])
+            data_text = data_text.replace("<script", "<pre>&lt;")  # --- Replace script in 'text' msg (stopping HTML generation) - 0.20b
+            if "<code>" in data_text:
+                if "</code>" not in data_text:
+                    data_text += "</code>"
+            data_text = data_text.replace("<", "&lt;").replace(">", "&gt;")  # make sure html in 'text' is not interpreted (v25) except for hyperlinks
+            data_text = data_text.replace("&lt;a href", "<a href").replace("&lt;/a&gt;", "</a>").replace("blank'&gt;", "blank'>")
+            data_text = str(data_text).replace("\n", "<br>")  # replace \n with <br> - 0.22d3
+        if data_text == "" and 'files' not in msg and 'mentionedPeople' not in msg:
+            # empty text without mentions or attached images/files: SKIP
+            print("_EMPTYmessage_")
+            beep(1)  # troubleshooting thing (to see, eh, hear how many "empty messages" are found)
+            continue
+        try:  # Put email & name in variable
+            data_email = str(msg['personEmail'])
+            data_userid = str(msg['personId'])
+            data_name = myMemberList[msg['personEmail']]
+        except:
+            data_name = data_email
+        if '@' in data_email and "error.com" not in data_email:
+            domain = str(data_email.split('@')[1])
+            myDomainStats[domain] = myDomainStats.get(domain, 0) + 1
+        messageYear, messageMonth, messageMonthNr = get_monthday(msg['created'])
+        # ====== GENERATE MONTH STATISTICS
+        statMessageMonthKey = messageYear + " - " + messageMonthNr + "-" + messageMonth
+        #  IF message is THREADED _AND_ the key doesn't exist: skip
+        # >>> below: if/print/else statement are added
+        if threaded_message and statMessageMonthKey not in statMessageMonth:
+            pass
+        else:
+            statMessageMonth[statMessageMonthKey] = statMessageMonth.get(statMessageMonthKey, 0) + 1
+        if messageMonth != previousMonth and not threaded_message:
+            htmldata += f"<div class='cssNewMonth' id='{statMessageMonthKey}'>   {messageYear}    <span style='color:#C3C4C7'>" + messageMonth + "</span><span style='float:right; font-size:56px; color:lightgrey;margin-right:15px; padding-top:0px;'><a href='#top' style='text-decoration:none;color:inherit;'>▲</a></span></div>"
+            if outputToText:  # for .txt output
+                textOutput += f"\n\n---------- {messageYear}    {messageMonth} ------------------------------\n\n"
+        # ====== if PREVIOUS email equals current email, then skip header
+        if threaded_message:  # ___________________________________ start thread ______________________________
+            htmldata += "<div class='css_message_thread'>"
+        else:
+            htmldata += "<div class='css_message'>"
+
+        # ====== AVATAR: + msg header: display or not
+        if (data_email != previousEmail) or (data_email == previousEmail and timedifference(msg["created"], previousMsgCreated) > 60) or (data_msg_was_edited):
+            if userAvatar == "link" and data_userid in userAvatarDict:
+                htmldata += f"<img src='{userAvatarDict[data_userid]}' class='avatarCircle'  width='36px' height='36px'/>"
+            elif userAvatar == "download" and data_userid in userAvatarDict:
+                htmldata += f"<img src='avatars/" + data_userid + ".jpg' class='avatarCircle'  width='36px' height='36px'/>"
+            else:  # User that may not exist anymore --> use email as name
+                if data_name == data_email:
+                    htmldata += f"<div id='avatarCircle'>{data_name[0:2].upper()}</div>"
                 else:
-                    filesize_fancy = convert_size(filesize)
-                fileextension = os.path.splitext(filename)[1][1:].lower()
-                if fileextension in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif'] and (downloadFiles in ["images", "files", "image", "file"]):
-                    if splitFilesImages == "":
-                        # extra return after all attached files are listed
-                        htmldata += "<br>"
-                        splitFilesImages = "done"
-                    htmldata += f"<div class='css_created'><img src='images/{filename} ' title='click to zoom' onclick='onClick(this)' class='image-hover-opacity' /><br>{filename}<br><div class='filesize'>{filesize_fancy}</div> </div>"
-                elif "file" in downloadFiles:
-                    htmldata += f"<br><div id='fileicon'></div><span style='line-height:32px;'><a href='files/{filename}'>{filename}</a>  ({filesize_fancy})</span>"
-                else:
-                    htmldata += f"<br><div id='fileicon'></div><span style='line-height:32px;'> {filename}   ({filesize_fancy})</span>"
-                if fileextension in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif']:
-                    statTotalImages += 1
-                    statTotalImagesSize += int(filesize)
-                else:
+                    # show circle with initials instead of avatar
+                    try:
+                        htmldata += "<div id='avatarCircle'>" + data_name.split(" ")[0][0].upper() + data_name.split(" ")[1][0].upper() + "</div><div class='css_message'>"
+                    except:  # Sometimes there's no "first/last" name. If one word, take the first 2 characters.
+                        htmldata += "<div id='avatarCircle'>" + data_name[0:2].upper() + "</div>"
+
+            msgDomain = data_email.split("@")[1]    # Get message sender domain
+            if myDomain == msgDomain:               # If domain <> own domain, use different color
+                htmldata += f"<span class='css_email{blurring}' title='{data_email}'>{data_name}</span>"
+            else:
+                htmldata += "<span class='css_email" + blurring + "' title='" + data_email + "'>" + data_name + "</span>   <span class='css_email_external" + blurring + "'>(@" + data_email.split("@")[1] + ")</span>"
+            htmldata += f"<span class='css_created'>{data_created}</span>"
+        else:
+            htmldata += "<div class='css_message'>"
+
+        if outputToText:  # for .txt output
+            if blurring != "":  # For blurring
+                data_email = "_____@_____.__"
+            if threaded_message:  # add ">>" to text output to indicate a thread v0.23
+                textOutput += convertDate(str(msg['created']), "%A %H:%M      (%b %d, %Y)") + "  >> " + data_email + ": "
+            else:
+                textOutput += convertDate(str(msg['created']), "%A %H:%M      (%b %d, %Y)") + "  " + data_email + ": "
+
+        # ====== DEAL WITH MENTIONS IN A MESSAGE
+        if 'mentionedPeople' in msg:
+            try:
+                statTotalMentions += 1
+                for item in msg['mentionedPeople']:
+                    texttoreplace = "<spark-mention data-object-type=\"person\" data-object-id=\"" + item + "\">"
+                    data_text = data_text.replace(texttoreplace, "<span class='atmention" + blurring + "'>@")
+                data_text = data_text.replace("</spark-mention>", "</span>")
+            except:
+                print(" **ERROR** processing mentions, don't worry, I will continue")
+        if 'mentionedGroups' in msg:
+            try:
+                statTotalMentions += 1
+                for item in msg['mentionedGroups']:
+                    texttoreplace = "<spark-mention data-object-type=\"groupMention\" data-group-type=\"" + item + "\">"
+                    data_text = data_text.replace(texttoreplace, "<span style='color:red;display:inline;'>@")
+                data_text = data_text.replace("</spark-mention>", "</span>")
+            except:
+                print(" **ERROR** processing mentions, don't worry, I will continue")
+        # check if msg is a card. If yes: add "cannot display" message
+        try:
+            if "contentType" in msg["attachments"][0]:
+                is_card = True
+        except:
+            is_card = False
+        if is_card:
+            data_text = "<span class='card_class'>&nbsp;<span style='color:red'>Card</span>&nbsp; content cannot be displayed in this archive&nbsp;</span>&nbsp;  " + data_text
+        htmldata += "<div class='css_messagetext'>" + data_text
+        if outputToText and 'text' in msg:  # for .txt output
+            if msg['text'] == "":
+                myErrorList.append("processing msgs: msg WITH html WITHOUT text? html: " + msg['html'] + " -- msg id: " + msg['id'])
+            p = re.compile(r'<.*?>')
+            textOutput += p.sub('', msg['text']).replace("\"", "'").replace("\n", " ").replace("\r", " ")
+            textOutput += "\n\r"
+        if outputToText and 'text' not in msg and 'files' not in msg:
+            textOutput += "\n\r"
+
+        # ====== DEAL WITH FILE ATTACHMENTS IN A MESSAGE
+        if 'files' in msg:
+            startTimerFiledownload()
+            if data_text != "":
+                htmldata += "<br>"
+            if downloadFiles == "no":   # download=no  - only show "file attachment", no details whatsoever
+                for i in range(len(msg['files'])):
+                    htmldata += f"<br><div id='fileicon'></div><span style='line-height:32px;'> attached_file</span>"
                     statTotalFiles += 1
-                    statTotalFilesSize += int(filesize)
-                if outputToText:  # for .txt output
-                    textOutput += f"                           Attachment: {filename} ({filesize_fancy})\n"
-        stopTimerFiledownload()
-    htmldata += "</div>"    # css_messagetext
-    htmldata += "</div>"    # css_message or css_message_thread
-    htmldata += "</div>"    # other div - needed!
-    previousEmail = data_email
-    if not threaded_message:
-        previousMonth = messageMonth
-    previousMsgCreated = msg['created']
-    if downloadFiles in ['images', 'files', 'image', 'file'] and (statTotalFiles + statTotalImages) > 0 and dl_duration_total > 0:
-        download_stats = f"\n {dl_duration_total:7.1f} download of {downloadFiles.replace('files', 'images and files')} ({statTotalFiles + statTotalImages} files,  {round((statTotalFiles + statTotalImages) / dl_duration_total, 2)} files/sec)"
-    elif downloadFiles == "info" and dl_duration_total > 0:
-        download_stats = f"\n {dl_duration_total:7.1f} process filenames ({statTotalFiles + statTotalImages} files, {round((statTotalFiles + statTotalImages) / dl_duration_total, 1)} files/sec)"
+                if outputToText:
+                    textOutput += f" <File Attachment> \n\n"  # v26
+            else:  # download=info/images/files
+                myFiles = process_Files(msg['files'], msg['created'])
+                # SORT attached files by <files> _then_ <images>
+                myFiles.sort(key=lambda x: x.split("###")[0].split(".")[-1] in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif'])
+                splitFilesImages = ""
+                for filename in myFiles:
+                    # IMAGE POPUP
+                    filename, filesize = filename.split("###")
+                    if int(filesize) == 0:
+                        filesize_fancy = "0 B"
+                    else:
+                        filesize_fancy = convert_size(filesize)
+                    fileextension = os.path.splitext(filename)[1][1:].lower()
+                    if fileextension in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif'] and (downloadFiles in ["images", "files", "image", "file"]):
+                        if splitFilesImages == "":
+                            # extra return after all attached files are listed
+                            htmldata += "<br>"
+                            splitFilesImages = "done"
+                        htmldata += f"<div class='css_created'><img src='images/{filename} ' title='click to zoom' onclick='onClick(this)' class='image-hover-opacity' /><br>{filename}<br><div class='filesize'>{filesize_fancy}</div> </div>"
+                    elif "file" in downloadFiles:
+                        htmldata += f"<br><div id='fileicon'></div><span style='line-height:32px;'><a href='files/{filename}'>{filename}</a>  ({filesize_fancy})</span>"
+                    else:
+                        htmldata += f"<br><div id='fileicon'></div><span style='line-height:32px;'> {filename}   ({filesize_fancy})</span>"
+                    if fileextension in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif']:
+                        statTotalImages += 1
+                        statTotalImagesSize += int(filesize)
+                    else:
+                        statTotalFiles += 1
+                        statTotalFilesSize += int(filesize)
+                    if outputToText:  # for .txt output
+                        textOutput += f"                           Attachment: {filename} ({filesize_fancy})\n"
+            stopTimerFiledownload()
+        htmldata += "</div>"    # css_messagetext
+        htmldata += "</div>"    # css_message or css_message_thread
+        htmldata += "</div>"    # other div - needed!
+        previousEmail = data_email
+        if not threaded_message:
+            previousMonth = messageMonth
+        previousMsgCreated = msg['created']
+        if downloadFiles in ['images', 'files', 'image', 'file'] and (statTotalFiles + statTotalImages) > 0 and dl_duration_total > 0:
+            download_stats = f"\n {dl_duration_total:7.1f} download of {downloadFiles.replace('files', 'images and files')} ({statTotalFiles + statTotalImages} files,  {round((statTotalFiles + statTotalImages) / dl_duration_total, 2)} files/sec)"
+        elif downloadFiles == "info" and dl_duration_total > 0:
+            download_stats = f"\n {dl_duration_total:7.1f} process filenames ({statTotalFiles + statTotalImages} files, {round((statTotalFiles + statTotalImages) / dl_duration_total, 1)} files/sec)"
+        else:
+            download_stats = ""
+    stopTimer("generate HTML messages (" + str(round(len(sortedMsgOrderTable), 1)) + ")" + download_stats, dl_duration_total)
+
+
+    # ======  *SORT* DOMAIN USER STATISTICS
+    startTimer()
+    myDomainStatsSorted = sorted(
+        [(v, k) for k, v in myDomainStats.items()], reverse=True)
+    myDomainStatsSorted = myDomainStatsSorted[0:10]  # only want the top 10
+    returntextDomain = ""
+    returntextMsgMonth = ""
+    stopTimer("sorting messages", 0)
+
+
+    # ======  TABLE OF CONTENTS
+    startTimer()
+    # If message sorting is old-to-new, also sort the TOC
+    if sortOldNew:  # Default
+        mytest = sorted(statMessageMonth.items(), reverse=False)
     else:
-        download_stats = ""
-stopTimer("generate HTML messages (" + str(round(len(sortedMsgOrderTable), 1)) + ")" + download_stats, dl_duration_total)
+        mytest = sorted(statMessageMonth.items(), reverse=True)
+    my_yearcounter = 0
+    prev_year = 0
+    tocList = "<table style='width: 290px;'>"
+    for k, v in mytest:
+        pr_year = int(k.split("-")[0])
+        pr_monthname = k.split("-")[2]
+        if prev_year != pr_year:
+            tocList += f"</table><a href='javascript:;' onclick=show('{pr_year}') style='text-decoration: none;font-weight:bolder;font-size'> <div id='yeararrow{pr_year}' style='display:inline;'>▼</div>  {pr_year}</span></a><br>"
+            tocList += f"<table id='expand year-{pr_year}' style='width: 290px;'>"
+            tocList += "<tr><td>"
+            my_yearcounter += 1
+        else:
+            tocList += "<tr><td>"
+        tocList += f"<a href='#{k}' style='text-decoration:none;'>&nbsp;&nbsp;{pr_year} - {pr_monthname}</a></td>"
+        tocList += f"<td><span class='month_msg_count'>{v:,}</span></td></tr>"
+        prev_year = pr_year
+
+    messageType = "newest"
+    if not sortOldNew:
+        messageType = "oldest"
+    tocList += "</table>"
+    tocList += "<table><tr><td colspan='2'>&nbsp;&nbsp;&nbsp;<span style='font-size:11px;'><a href='#endoffile' style='text-decoration:none;'>" + messageType + " message</a></span></td></tr></table>"
 
 
-# ======  *SORT* DOMAIN USER STATISTICS
-startTimer()
-myDomainStatsSorted = sorted(
-    [(v, k) for k, v in myDomainStats.items()], reverse=True)
-myDomainStatsSorted = myDomainStatsSorted[0:10]  # only want the top 10
-returntextDomain = ""
-returntextMsgMonth = ""
-stopTimer("sorting messages", 0)
+    # ======  DOMAIN MESSAGE STATISTICS
+    total_stat_users = 0
+    returntextDomain += "<table id='mytoc' style='width: 220px;'>"
+    for domain in myDomainStatsSorted:
+        if domain[1] == "user_removed_their_msg.com":
+            continue
+        if blurring != "":
+            blurring = "class='myblur'"
+        returntextDomain += f"<tr><td {blurring}>{domain[1]}</td><td style='text-align:right;'>{domain[0]:,}</td>"
+        total_stat_users += int(domain[0])
+    if (statTotalMessages - total_stat_users) > 0 and len(myDomainStatsSorted) > 9:
+        returntextDomain += f"<tr><td>...other domains</td><td style='text-align:right;'>{(statTotalMessages-total_stat_users):,}</td>"
+    returntextDomain += "</table>"
 
 
-# ======  TABLE OF CONTENTS
-startTimer()
-# If message sorting is old-to-new, also sort the TOC
-if sortOldNew:  # Default
-    mytest = sorted(statMessageMonth.items(), reverse=False)
-else:
-    mytest = sorted(statMessageMonth.items(), reverse=True)
-my_yearcounter = 0
-prev_year = 0
-tocList = "<table style='width: 290px;'>"
-for k, v in mytest:
-    pr_year = int(k.split("-")[0])
-    pr_monthname = k.split("-")[2]
-    if prev_year != pr_year:
-        tocList += f"</table><a href='javascript:;' onclick=show('{pr_year}') style='text-decoration: none;font-weight:bolder;font-size'> <div id='yeararrow{pr_year}' style='display:inline;'>▼</div>  {pr_year}</span></a><br>"
-        tocList += f"<table id='expand year-{pr_year}' style='width: 290px;'>"
-        tocList += "<tr><td>"
-        my_yearcounter += 1
-    else:
-        tocList += "<tr><td>"
-    tocList += f"<a href='#{k}' style='text-decoration:none;'>&nbsp;&nbsp;{pr_year} - {pr_monthname}</a></td>"
-    tocList += f"<td><span class='month_msg_count'>{v:,}</span></td></tr>"
-    prev_year = pr_year
-
-messageType = "newest"
-if not sortOldNew:
-    messageType = "oldest"
-tocList += "</table>"
-tocList += "<table><tr><td colspan='2'>&nbsp;&nbsp;&nbsp;<span style='font-size:11px;'><a href='#endoffile' style='text-decoration:none;'>" + messageType + " message</a></span></td></tr></table>"
-
-
-# ======  DOMAIN MESSAGE STATISTICS
-total_stat_users = 0
-returntextDomain += "<table id='mytoc' style='width: 220px;'>"
-for domain in myDomainStatsSorted:
-    if domain[1] == "user_removed_their_msg.com":
-        continue
-    if blurring != "":
-        blurring = "class='myblur'"
-    returntextDomain += f"<tr><td {blurring}>{domain[1]}</td><td style='text-align:right;'>{domain[0]:,}</td>"
-    total_stat_users += int(domain[0])
-if (statTotalMessages - total_stat_users) > 0 and len(myDomainStatsSorted) > 9:
-    returntextDomain += f"<tr><td>...other domains</td><td style='text-align:right;'>{(statTotalMessages-total_stat_users):,}</td>"
-returntextDomain += "</table>"
-
-
-# ======  MESSAGE & FILE STATISTICS
-tocStats = "<table id='mytoc' style='width: 250px;'>"
-tocStats += f"<tr><td># of messages: </td><td style='text-align:right;'> {len(sortedMsgOrderTable):,} </td></tr>"
-#  ^^^^ 0.26d don't show total msg downloaded but the actual number of msg
-if statTotalImages > 0:
-    tocStats += f"<tr><td> # images: "
-    if downloadFiles in ['no', 'info']:
-        tocStats += f"<span style='color:grey;font-size:10px;'>not downloaded</span> "
-    tocStats += f"</td><td style='text-align:right;'> {statTotalImages:,} </td></tr>"
-if statTotalImages > 0 and statTotalImagesSize > 0:
-    tocStats += f"<tr><td>&nbsp;&nbsp;&nbsp;size: </td><td style='text-align:right;'> {convert_size(statTotalImagesSize)} </td></tr>"
-    tocStats += f"<tr><td>&nbsp;&nbsp;&nbsp;average size: </td><td style='text-align:right;'> {convert_size(statTotalImagesSize / statTotalImages)} </td></tr>"
-tocStats += f"<tr><td> # files: "
-if downloadFiles in ['no', 'info', 'images', 'image']:
-    tocStats += f"<span style='color:grey;font-size:10px;'>not downloaded</span> "
-tocStats += f"</td><td style='text-align:right;'> {statTotalFiles:,} </td></tr>"
-if statTotalFiles > 0 and statTotalFilesSize > 0:
-    tocStats += f"<tr><td>&nbsp;&nbsp;&nbsp;size: </td><td style='text-align:right;'> {convert_size(statTotalFilesSize)} </td></tr>"
-    tocStats += f"<tr><td>&nbsp;&nbsp;&nbsp;average size: </td><td style='text-align:right;'> {convert_size(statTotalFilesSize / statTotalFiles)} </td></tr>"
-tocStats += f"<tr><td># @mentions: </td><td style='text-align:right;'> {statTotalMentions:,} </td></tr>"
-tocStats += f"<tr><td># total members: </td><td style='text-align:right;'> {len(myMembers):,} </td></tr>"
-tocStats += f"<tr><td># active members: <br>&nbsp;&nbsp;&nbsp;<span style='font-size:11px;'>(in this archive)</span> </td><td style='text-align:right;'> {len(uniqueUserIds):,} </td></tr>"
-if statTotalMessages > maxTotalMessages - 10:
-    tocStats += f"<tr><td colspan='2'><br><span style='color:grey;font-size:10px;'>space contains more than  {statTotalMessages:,} messages</span></td></tr>"
-tocStats += "</table>"
-if outputToText:  # for .txt output
-    textOutput += f"\n\n\n STATISTICS \n--------------------------\n # of messages : {len(sortedMsgOrderTable):,}\n # of images   : {statTotalImages:,}\n # of files    : {statTotalFiles:,}\n # of mentions : {statTotalMentions:,}\n\n\n"
+    # ======  MESSAGE & FILE STATISTICS
+    tocStats = "<table id='mytoc' style='width: 250px;'>"
+    tocStats += f"<tr><td># of messages: </td><td style='text-align:right;'> {len(sortedMsgOrderTable):,} </td></tr>"
     #  ^^^^ 0.26d don't show total msg downloaded but the actual number of msg
+    if statTotalImages > 0:
+        tocStats += f"<tr><td> # images: "
+        if downloadFiles in ['no', 'info']:
+            tocStats += f"<span style='color:grey;font-size:10px;'>not downloaded</span> "
+        tocStats += f"</td><td style='text-align:right;'> {statTotalImages:,} </td></tr>"
+    if statTotalImages > 0 and statTotalImagesSize > 0:
+        tocStats += f"<tr><td>&nbsp;&nbsp;&nbsp;size: </td><td style='text-align:right;'> {convert_size(statTotalImagesSize)} </td></tr>"
+        tocStats += f"<tr><td>&nbsp;&nbsp;&nbsp;average size: </td><td style='text-align:right;'> {convert_size(statTotalImagesSize / statTotalImages)} </td></tr>"
+    tocStats += f"<tr><td> # files: "
+    if downloadFiles in ['no', 'info', 'images', 'image']:
+        tocStats += f"<span style='color:grey;font-size:10px;'>not downloaded</span> "
+    tocStats += f"</td><td style='text-align:right;'> {statTotalFiles:,} </td></tr>"
+    if statTotalFiles > 0 and statTotalFilesSize > 0:
+        tocStats += f"<tr><td>&nbsp;&nbsp;&nbsp;size: </td><td style='text-align:right;'> {convert_size(statTotalFilesSize)} </td></tr>"
+        tocStats += f"<tr><td>&nbsp;&nbsp;&nbsp;average size: </td><td style='text-align:right;'> {convert_size(statTotalFilesSize / statTotalFiles)} </td></tr>"
+    tocStats += f"<tr><td># @mentions: </td><td style='text-align:right;'> {statTotalMentions:,} </td></tr>"
+    tocStats += f"<tr><td># total members: </td><td style='text-align:right;'> {len(myMembers):,} </td></tr>"
+    tocStats += f"<tr><td># active members: <br>&nbsp;&nbsp;&nbsp;<span style='font-size:11px;'>(in this archive)</span> </td><td style='text-align:right;'> {len(uniqueUserIds):,} </td></tr>"
+    if statTotalMessages > maxTotalMessages - 10:
+        tocStats += f"<tr><td colspan='2'><br><span style='color:grey;font-size:10px;'>space contains more than  {statTotalMessages:,} messages</span></td></tr>"
+    tocStats += "</table>"
+    if outputToText:  # for .txt output
+        textOutput += f"\n\n\n STATISTICS \n--------------------------\n # of messages : {len(sortedMsgOrderTable):,}\n # of images   : {statTotalImages:,}\n # of files    : {statTotalFiles:,}\n # of mentions : {statTotalMentions:,}\n\n\n"
+        #  ^^^^ 0.26d don't show total msg downloaded but the actual number of msg
 
 
-# ======  HEADER
-newtocList = "<table class='myheader' id='myheader'> <tr>"
-newtocList += "<td style='width:300px;'> <strong>Index </strong>"
-newtocList += "<span style='text-decoration:none; font-size:10px;'><a href='javascript:;' onclick='show_showall()'>expand</a> / <a href='javascript:;' onclick='show_hideall()'>collapse</a></span>"
-newtocList += "<br>" + tocList + " </td>"
-newtocList += "<td> <strong>Numbers</strong><br>" + tocStats + " </td>"
-newtocList += "<td> <table id='mytoc' style='width: 220px;'><tr><td style='text-align:left;font-weight:bold;'>Top-10 domains</td><td style='text-align:right;font-weight:bold;'># messages</td></tr></tbody></table>" + returntextDomain + " </td>"
-newtocList += "</tr> </table></div><br><br>"
+    # ======  HEADER
+    newtocList = "<table class='myheader' id='myheader'> <tr>"
+    newtocList += "<td style='width:300px;'> <strong>Index </strong>"
+    newtocList += "<span style='text-decoration:none; font-size:10px;'><a href='javascript:;' onclick='show_showall()'>expand</a> / <a href='javascript:;' onclick='show_hideall()'>collapse</a></span>"
+    newtocList += "<br>" + tocList + " </td>"
+    newtocList += "<td> <strong>Numbers</strong><br>" + tocStats + " </td>"
+    newtocList += "<td> <table id='mytoc' style='width: 220px;'><tr><td style='text-align:left;font-weight:bold;'>Top-10 domains</td><td style='text-align:right;font-weight:bold;'># messages</td></tr></tbody></table>" + returntextDomain + " </td>"
+    newtocList += "</tr> </table></div><br><br>"
 
-# ====== IMAGE POPUP
-imagepopuphtml = """      <div id="modal01" class="image-modal" onclick="this.style.display='none'">
-         <div class="image-modal-content image-animate-zoom">
-            <img id="img01" class="imagepopup">
-         </div>
-      </div>
-         <script>
-            function onClick(element) {
-               document.getElementById("img01").src = element.src;
-               document.getElementById("modal01").style.display = "block";
-            }
-            document.addEventListener('keydown', function(event) {
-                const key = event.key;
-                if (key === "Escape") {
-                   document.getElementById("modal01").style.display = "none";
+    # ====== IMAGE POPUP
+    imagepopuphtml = """      <div id="modal01" class="image-modal" onclick="this.style.display='none'">
+             <div class="image-modal-content image-animate-zoom">
+                <img id="img01" class="imagepopup">
+             </div>
+          </div>
+             <script>
+                function onClick(element) {
+                   document.getElementById("img01").src = element.src;
+                   document.getElementById("modal01").style.display = "block";
                 }
-            });
-            // SCROLL TO TOP button
-            window.onscroll = function() {scrollFunction()};
-            function scrollFunction() {
-              if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                document.getElementById("myBtn").style.display = "block";
-              } else {
-                document.getElementById("myBtn").style.display = "none";
-              }
-            }
+                document.addEventListener('keydown', function(event) {
+                    const key = event.key;
+                    if (key === "Escape") {
+                       document.getElementById("modal01").style.display = "none";
+                    }
+                });
+                // SCROLL TO TOP button
+                window.onscroll = function() {scrollFunction()};
+                function scrollFunction() {
+                  if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                    document.getElementById("myBtn").style.display = "block";
+                  } else {
+                    document.getElementById("myBtn").style.display = "none";
+                  }
+                }
 
-            // When the user clicks on the button, scroll to the top of the document
-            function topFunction() {
-              document.body.scrollTop = 0;
-              document.documentElement.scrollTop = 0;
-            }
-         </script>
+                // When the user clicks on the button, scroll to the top of the document
+                function topFunction() {
+                  document.body.scrollTop = 0;
+                  document.documentElement.scrollTop = 0;
+                }
+             </script>
 
-"""
+    """
 
-# ======  FOOTER
-htmlfooter = "<br><br><div class='cssNewMonth' id='endoffile'> end of file &nbsp;&nbsp;<span style='float:right; font-size:16px; margin-right:15px; padding-top:24px;'><a href='#top' style='text-decoration:none;'>back to top</a></span></div><br><br>"
+    # ======  FOOTER
+    htmlfooter = "<br><br><div class='cssNewMonth' id='endoffile'> end of file &nbsp;&nbsp;<span style='float:right; font-size:16px; margin-right:15px; padding-top:24px;'><a href='#top' style='text-decoration:none;'>back to top</a></span></div><br><br>"
 
-# ======  PUT EVERYTHING TOGETHER
-print("\n #8 --- Finalizing HTML")
-htmldata = htmlheader + newtocList + htmldata + htmlfooter + imagepopuphtml + "</body></html>"
-stopTimer("generate ToC, statistics, header and footer", 0)
-
-
-# ======  WRITE to HTML FILE
-startTimer()
-with open(myOutputFolder + "/" + outputFileName + ".html", 'w', encoding='utf-8') as f:
-    print(htmldata, file=f)
-stopTimer("write html to file", 0)
-
-# ======  WRITE to TEXT FILE
-if outputToText:
-    with open(myOutputFolder + "/" + outputFileName + ".txt", 'w', encoding='utf-8') as f:
-        print(textOutput, file=f)
+    # ======  PUT EVERYTHING TOGETHER
+    print("\n #8 --- Finalizing HTML")
+    htmldata = htmlheader + newtocList + htmldata + htmlfooter + imagepopuphtml + "</body></html>"
+    stopTimer("generate ToC, statistics, header and footer", 0)
 
 
-if printPerformanceReport:
-    msg_time = int(performanceReport.split("order table")[1].split(" generate HTML")[0].lstrip().split(".")[0])
-    if msg_time == 0:
-        msg_time = 1
-    msg_nr = int(performanceReport.split(" (")[1].split(")")[0])
-    msg_statsline = performanceReport.split("order table")[1].split(")")[0].lstrip() + ")"
-    msg_per_sec = msg_nr / msg_time
-    msg_statsline_new = msg_statsline.replace(")", f" msg, {msg_per_sec:.0f} msg/sec)")
-    performanceReport = performanceReport.replace(msg_statsline, msg_statsline_new)
-    print(f"{performanceReport}\n\n")  # ______________________________________________________\n")
+    # ======  WRITE to HTML FILE
+    startTimer()
+    with open(myOutputFolder + "/" + outputFileName + ".html", 'w', encoding='utf-8') as f:
+        print(htmldata, file=f)
+    stopTimer("write html to file", 0)
+
+    # ======  WRITE to TEXT FILE
+    if outputToText:
+        with open(myOutputFolder + "/" + outputFileName + ".txt", 'w', encoding='utf-8') as f:
+            print(textOutput, file=f)
 
 
-# ======  PRINT ERROR LIST
-if len(myErrorList) > 0 and printErrorList:
-    print("\n    -------------------- Error Messages ---------------------")
-    for myerrors in myErrorList:
-        print(f" > {myerrors}")
+    if printPerformanceReport:
+        msg_time = int(performanceReport.split("order table")[1].split(" generate HTML")[0].lstrip().split(".")[0])
+        if msg_time == 0:
+            msg_time = 1
+        msg_nr = int(performanceReport.split(" (")[1].split(")")[0])
+        msg_statsline = performanceReport.split("order table")[1].split(")")[0].lstrip() + ")"
+        msg_per_sec = msg_nr / msg_time
+        msg_statsline_new = msg_statsline.replace(")", f" msg, {msg_per_sec:.0f} msg/sec)")
+        performanceReport = performanceReport.replace(msg_statsline, msg_statsline_new)
+        print(f"{performanceReport}\n\n")  # ______________________________________________________\n")
+
+
+    # ======  PRINT ERROR LIST
+    if len(myErrorList) > 0 and printErrorList:
+        print("\n    -------------------- Error Messages ---------------------")
+        for myerrors in myErrorList:
+            print(f" > {myerrors}")
+
+    print("\n\n")
 
 print(" _______________________ ready ________________________\n\n")
 beep(1)
