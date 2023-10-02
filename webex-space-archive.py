@@ -846,7 +846,7 @@ def get_messages(mytoken, myroom, myMaxMessages):
                 # When retrieving multiple batches _check_ if the last message retrieved
                 #      is _OLDER_ than the configured max msg age (in the .ini). If yes: trim results to the max age.
                 if msgMaxAge != 0:
-                    msgAge = timedifferencedays(result.json()["items"][-1]["created"])
+                    msgAge = timedifferencedays(result.json()["items"][-1]["created"]) if result.json()["items"] else -1
                     if msgAge > msgMaxAge:
                         print("          max messages reached (>" + str(msgMaxAge) + " days old)")
                         # NOW I set maxTotalMessages to the last msg index that should be included, based on msg age in days.
@@ -858,7 +858,7 @@ def get_messages(mytoken, myroom, myMaxMessages):
             else:
                 resultjsonmessages = resultjsonmessages + result.json()["items"]
                 if msgMaxAge != 0:
-                    msgAge = timedifferencedays(result.json()["items"][-1]["created"])
+                    msgAge = timedifferencedays(result.json()["items"][-1]["created"]) if result.json()["items"] else -1
                     lastMsgLocation = next((index for (index, d) in enumerate(resultjsonmessages) if timedifferencedays(d["created"]) > msgMaxAge), 99999)
                     maxTotalMessages = lastMsgLocation
                 print(f" FINISHED total messages: {messageCount}")
