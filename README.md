@@ -1,6 +1,8 @@
 # Webex Space Archiver 
 
-**NEW: Important Release v30!** (check out new features in the [release notes](#releasenotes))
+***NOTE: this code uses the (old) WebexSDK that only supports up to Python 3.9 or 3.10!***
+
+Important Release v30!** (check out new features in the [release notes](#releasenotes))
 
 [Features](#features)
 
