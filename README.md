@@ -2,9 +2,6 @@
 
 ***Because of a 'refocus' this repository will no longer be maintained by myself.***  *Many thanks to the kinds words received from the users and the feedback they have been providing over the past years!*
 
-***NOTE: this code uses the (old) WebexSDK that only supports up to Python 3.9 or 3.10!***
-
-
 Important Release v30!** (check out new features in the [release notes](#releasenotes))
 
 [Features](#features)
