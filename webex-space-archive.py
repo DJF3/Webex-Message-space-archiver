@@ -40,7 +40,7 @@ except ImportError:
 
 #--------- DO NOT CHANGE ANYTHING BELOW ---------
 __author__ = "Dirk-Jan Uittenbogaard"
-__email__ = "duittenb@cisco.com"
+__email__ = "dirkjanu@gmail.com"
 __version__ = "0.30"
 __copyright__ = "Copyright (c) 2022 Cisco and/or its affiliates."
 __license__ = "Cisco Sample Code License, Version 1.1"
