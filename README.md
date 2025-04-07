@@ -1,30 +1,26 @@
 # Webex Space Archiver 
 
-***Because of a 'refocus' this repository will no longer be maintained by myself.***  *Many thanks to the kinds words received from the users and the feedback they have been providing over the past years!*
+Archives the messages of a Cisco Webex space to a single HTML file. 
 
+***This repository is no longer actively maintained.**
+Many thanks for the kinds words received from the users and the feedback they have been providing over the past years!*
 
-***UPDATE*** on request I have added a Python script that reads all of your space names and generates an .sh/bat script which runs the archive script for all of your spaces. Instructions are inside the "generate_space_batch.py" file. 
+* [Features](#features)
+* [Start](#start)
+* [Configure](#configuration)
+* [Release notes](#release-notes)
+* [Troubleshooting](#troubleshooting)
+* [Release Notes](#release-notes)
+* [Feedback & Support](#feedback--support)
 
+[![Cisco Devnet Published Status]( https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)
+](https://developer.cisco.com/codeexchange/github/repo/DJF3/Webex-Teams-Space-Archive-v2/) 
 
-Important Release v30! (check out new features in the [release notes](#releasenotes))
+This code was written for a customer as an example. I specifically wanted 1 (_one_) .py file that did everything. 
+It's not beautiful code, but it works :-)
 
-[Features](#features)
+Feedback? Please go [here](#feedback--support) and let me know what you think!
 
-[Start](#start)
-
-[Configure](#configuration)
-
-[Release notes](#releasenotes)
-
-[Troubleshooting](#troubleshooting)
-
-[Feedback & Support](#feedback)
-
-
-[<img src="https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg" alt="published" data-canonical-src="https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg" style="max-width: 100%;">](https://developer.cisco.com/codeexchange/github/repo/DJF3/Webex-Teams-Space-Archive-v2/) 
-
-Archive Cisco Webex space messages to a single HTML file. NOTE: This code is written for a customer as an example. I specifically wanted 1 (_one_) .py file that did everything. It's not beautiful code but it works :-)
-Feedback? Please go [here](#feedback) and let me know what you think!
 
 # VIDEO 
 [**_How to use & Demo_**](https://youtu.be/gula_Hxh2ms)
@@ -32,7 +28,7 @@ Feedback? Please go [here](#feedback) and let me know what you think!
 # SCREENSHOT
 Example HTML file of an archived Webex space: 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/DJF3/Webex-Message-space-archiver/master/webexteams-archive-screenshot.jpg" width="600px">
+![Screenshot of sample output HTML file](https://raw.githubusercontent.com/DJF3/Webex-Message-space-archiver/master/webexteams-archive-screenshot.jpg)
 
 
 # REQUIREMENTS
@@ -43,15 +39,15 @@ Example HTML file of an archived Webex space:
 * Mac: SSL fix (see [troubleshooting](#troubleshooting) section at the end)  
 
 
-<a name="features"/>
-        
 # Features
 
 * Archives all messages in a space
 * Find space ID with built in search function
-* Batch archiving with multiple config files & commandline parameters _NEW_
+* Batch archiving with multiple config files & command line parameters
+* Generate .sh/.bat which runs the archive script for all of your spaces. 
+  (Instructions are inside the *generate_space_batch.py* file.)
 * Deal with threaded messages
-* Support for automatic and manual DST configuration ('summertime') _NEW_
+* Support for automatic and manual DST configuration ('summertime')
 * Download images, files or both (with msg file date)
 * All files are organized: \spacenamefolder with subfolders for \files, \images, \avatars
 * Export space data to JSON and/or TXT file
@@ -64,10 +60,11 @@ Example HTML file of an archived Webex space:
 * Display: quoted or formatted text
 * Display: external users in different color (users with other domain)
 * Display: images in popup when clicked
-* Support for blurring email addresses and names _NEW_
+* Support for blurring email addresses and names
 * Print: just like it appears on the screen
 
 ## It doesn't:
+
 * Clean your dishes 
 * Download whiteboards (unless you post a snapshot)
 * Download/display files shared in external Enterprise Content Management systems (Onedrive/Sharepoint)
@@ -77,42 +74,41 @@ Example HTML file of an archived Webex space:
 
 ## NOTE:
 
-* The message TIME **displayed** is in the UTC timezone. The timezone on your device defines how this UTC time/date is displayed. A message send at 12:43 CEST is stored as 10:43 UTC. When you change your timezone to PDT (UTC-7) it will be displayed as 03:43.
-* When **printing** the generated HTML file in Firefox: File, Print, check "print background colors and images", then print or save to PDF
+* The message TIME **displayed** is in the UTC timezone. 
+  The timezone on your device defines how this UTC time/date is displayed. 
+ A message send at 12:43 CEST is stored as 10:43 UTC. When you change your timezone to PDT (UTC-7) it will be displayed as 03:43.
+* When **printing** the generated HTML file in Firefox: 
+  File, Print, check "print background colors and images", then print or save to PDF
 * To store your Webex token in an environment variable:
   * Windows: ```set WEBEX_ARCHIVE_TOKEN=YOUR_TOKEN_HERE```
   * Mac: ```export WEBEX_ARCHIVE_TOKEN='YOUR_TOKEN_HERE'```
 
 
-<a name="start"/>
-
 # Start
 
 1. Meet the requirements
 
-2. Run the script (```python webex-space-archive.py```) to _create the configuration file_ "webexspacearchive-config.ini" (if it does not exist)
+2. Run the script (```python webex-space-archive.py```) to create the 
+   configuration file _webexspacearchive-config.ini_ (if it does not exist)
 
-3. In the webexspacearchive-config.ini file, save your developer token or (👍better!) create an environment variable called "WEBEX_ARCHIVE_TOKEN" with your token 
+3. In the _webexspacearchive-config.ini_ file, save your developer token 
+   or (👍better!) create an environment variable called "WEBEX_ARCHIVE_TOKEN" with your token 
 
 4. Run the script: ```python webex-space-archive.py```
 
-| parameter |  |
-| ------------- | ------------- |
-| *nothing* | use standard configuration .ini file |
-| CONFIG_FILE | use non-standard configuration .ini file<br>```testspace.ini``` |
-| SEARCH_STRING | search for space name to get the space ID<br>```ciscolive``` |
-| SPACE_ID | use this SPACE_ID with standard configuration .ini file<br>```Y2lzY29zcGFyazovL3VzL0lfS05FVy95b3Vfd291bGRfdHJ5X2hhaGE``` |
-| CONFIG_FILE SPACE_ID | use non-standard configuration .ini file _and_ provided SPACE_ID<br>```a combination of examples above``` |
-| SPACE_ID CONFIG_FILE | use non-standard configuration .ini file _and_ provided SPACE_ID |
-
+| parameter                                              | Description                                                                                                              |
+|--------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| *nothing*                                              | use standard configuration .ini file                                                                                     |
+| CONFIG_FILE                                            | use non-standard configuration .ini file<br>```testspace.ini```                                                          |
+| SEARCH_STRING                                          | search for space name to get the space ID<br>```ciscolive```                                                             |
+| SPACE_ID                                               | use this SPACE_ID with standard configuration .ini file<br>```Y2lzY29zcGFyazovL3VzL0lfS05FVy95b3Vfd291bGRfdHJ5X2hhaGE``` |
+| CONFIG_FILE SPACE_ID<br>- or -<br>SPACE_ID CONFIG_FILE | use non-standard configuration .ini file _and_ provided SPACE_ID<br>```a combination of examples above```                |
 
 
 **UPGRADE?**
 Replace the .py file and keep the configuration file (.ini). 
 To get changes in the .ini file, run the script once without .ini file and it will create one for you with the latest remarks and features.
 
-
-<a name="configuration"/>
 
 # Configuration
 Edit the following variables in the python file:
@@ -202,6 +198,7 @@ TIP: to get the space ID of a space that you are in, in the client go to help / 
 - parameter 2  : Weekday number. 1-7 (1=Monday, 7=Sunday) 
 - parameter 3  : Month. 1-12 (1=January, 12=December)
 
+Info: [DST dates](https://www.timeanddate.com/time/dst/2023.html) around the world
 
 ---
 
@@ -211,19 +208,14 @@ TIP: to get the space ID of a space that you are in, in the client go to help / 
 - "yes"  : Note that it is a *VISUAL* blur. Data can still be copy/pasted
 
 
-
-<a name="troubleshooting"></a>
-
 # Troubleshooting
-Most of the errors should be handles by the script.
+Most of the errors should be handled by the script.
 * **SSL Issue**: On a Mac: the default SSL is outdated & unsupported. Check out the *readme.rtf* in your Python Application folder. That folder also contains a "Install certificates.command" which should do the work for you.
 
 
-<a name="releasenotes"></a>
-
 # Release Notes
 
-For old releasenotes click [here](https://github.com/DJF3/Webex-Message-space-archiver/blob/master/README-oldreleasenotes.md)
+For old release notes click [here](https://github.com/DJF3/Webex-Message-space-archiver/blob/master/README-oldreleasenotes.md)
 
 ## Enhancements in release v30 - March 19th 2023
 
@@ -267,11 +259,8 @@ Overall: increased output quality and precision. Support for DST, privacy blurri
 **NOTE**
 - CARDS: cards and buttons won't be visible in the html output
 
-# Info
-- [DST dates](https://www.timeanddate.com/time/dst/2023.html) around the world
-
-
-<a name="feedback"/>
 
 # Feedback & Support
-Open an issue on Github (above) or if you know my personal email address: send a message on Webex (not via email!).
+
+[Open an issue on Github](https://github.com/DJF3/Webex-Message-space-archiver/issues/new) 
+or if you know my personal email address: send a message on Webex (not via email!).
