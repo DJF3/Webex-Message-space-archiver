@@ -1,6 +1,8 @@
 # Webex Space Archiver 
 
 ***Because of a 'refocus' this repository will no longer be maintained by myself.***  *Many thanks to the kinds words received from the users and the feedback they have been providing over the past years!*
+
+
 ***UPDATE*** on request I have added a Python script that reads all of your space names and generates an .sh/bat script which runs the archive script for all of your spaces. Instructions are inside the "generate_space_batch.py" file. 
 
 
