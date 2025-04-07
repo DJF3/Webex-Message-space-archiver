@@ -6,7 +6,7 @@
 ***UPDATE*** on request I have added a Python script that reads all of your space names and generates an .sh/bat script which runs the archive script for all of your spaces. Instructions are inside the "generate_space_batch.py" file. 
 
 
-Important Release v30!** (check out new features in the [release notes](#releasenotes))
+Important Release v30! (check out new features in the [release notes](#releasenotes))
 
 [Features](#features)
 
