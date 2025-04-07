@@ -1,0 +1,8 @@
+# Editor files
+.idea/
+
+# Config file
+/webexspacearchive-config.ini
+
+# Directories created by the archive script and their contents
+/*/
