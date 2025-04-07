@@ -41,8 +41,8 @@ except ImportError:
 #--------- DO NOT CHANGE ANYTHING BELOW ---------
 __author__ = "Dirk-Jan Uittenbogaard"
 __email__ = "dirkjanu@gmail.com"
-__version__ = "0.30"
-__copyright__ = "Copyright (c) 2022 Cisco and/or its affiliates."
+__version__ = "0.31b"
+__copyright__ = "Copyright (c) 2025 Cisco and/or its affiliates."
 __license__ = "Cisco Sample Code License, Version 1.1"
 sleepTime = 3
 version = __version__
@@ -74,10 +74,10 @@ print(f"\n\n\n========================= START ========================={version}
 cl_args = ' '.join(sys.argv[1:]).strip()
 cl_count = len(sys.argv) - 1
 #___ parameter: nothing - default config file
-#  = 0 ___
+#_=0___
 if cl_count == 0:
     print(f"    Using default config file: {configFile}")
-#  = 1 ___
+#_=1___
 #___ parameter: space ID
 if cl_count == 1 and "Y2lzY" in cl_args:
     myRoom = cl_args
@@ -90,7 +90,7 @@ elif cl_count == 1 and ".ini" in cl_args:
 elif cl_count == 1:
     mySearch = cl_args
     print(f"    Searching for space containing '{mySearch}'")
-#  > 1 ___
+#_>1___
 #___ parameter: Space ID and INI (in no particular order)
 if cl_count > 1 and ".ini" in cl_args:
     if ".ini" in sys.argv[1]:
@@ -170,6 +170,7 @@ if os.path.isfile("./" + configFile):
             msgMinAge = 0
         userAvatar = config['Archive Settings']['useravatar']
         outputToJson = config['Archive Settings']['outputjson']
+        # ______DST!_______
         if config.has_option('Archive Settings', 'dst_start') and config.has_option('Archive Settings', 'dst_stop'):
             dst_start = config['Archive Settings']['dst_start']
             dst_stop = config['Archive Settings']['dst_stop']
@@ -706,6 +707,7 @@ blockquote {
 #          message date/time so the actual times for your timezone are displayed.
 #          It also checks for DST
 def convertDate(inputdate, returnFormat):
+    # ______DST!_______
     FMT = "%Y-%m-%dT%H:%M:%S.%fZ"  # UTC format stored in Webex cloud
     inputdate = datetime.datetime.strptime(inputdate, FMT)
     dstinfo = time.localtime(int(inputdate.timestamp()))
@@ -757,7 +759,7 @@ def timedifferencedays(msgdate):
 # FUNCTION finds URLs in message text + convert to a hyperlink. Used in HTML generation.
 def convertURL(inputtext):
     outputtext = inputtext
-    urls = re.findall('(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&!:/~+#-]*[\w@?^=%&/~+#-])?', inputtext)
+    urls = re.findall(r'(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&!:/~+#-]*[\w@?^=%&/~+#-])?', inputtext)
     urls = set(urls)
     if len(urls) > 0:
         for replaceThisURL in urls:
@@ -1196,7 +1198,7 @@ def create_threading_order_table(WebexMessages):
                 else:
                     msgOrderTable[(str(float("%.3f" % msgOrderIndex)))] = missing_parent_msg['id']
                     msgOrderIndex = msgOrderIndex + 1.000
-                # DJ: NOW the ordertables are available and ready for the "threaded message" (there is a parent for the message)
+                # NOW the ordertables are available and ready for the "threaded message" (there is a parent for the message)
             # 1 get msgOrderIndex for parent ID in msgOrderTable.
             try:
                 newOrderIndex = float(list(msgOrderTable.keys())[list(msgOrderTable.values()).index(msg['parentId'])])
@@ -1464,7 +1466,6 @@ if userAvatar == "link" or userAvatar == "download":
     print(" #4c--- MEMBER Avatars: downloading avatar files for " + str(len(userAvatarDict)) + " members  ")  #, end='', flush=True)
     if userAvatar == "download":
         download_avatars(userAvatarDict)
-    # print("")
 stopTimer("download avatars", 0)
 
 
@@ -1561,9 +1562,10 @@ if outputToText:
         textOutput += "Yes\n"
 
 
+
 # ====== WRITE JSON data to a FILE =============================================
-#   (optional) Write JSON to a FILE to be used as input (not using the Webex Message APIs)
 startTimer()
+#   (optional) Write JSON to a FILE to be used as input (not using the Webex Message APIs)
 if outputToJson == "yes" or outputToJson == "both" or outputToJson == "json":
     with open(myOutputFolder + "/" + outputFileName + ".json", 'w', encoding='utf-8') as f:
         json.dump(WebexMessages, f)
@@ -1573,7 +1575,7 @@ stopTimer("output to json", 0)
 # Progress bar:
 mycounter = 0
 download_stats = ""
-progress_steps = int(len(sortedMsgOrderTable) / 20)  # 0.26d don't show total msg downloaded but the actual number of msg
+progress_steps = int(len(sortedMsgOrderTable) / 20)
 if progress_steps < 1:
     progress_steps = 1  # Fix issue with low number of maxtotalmessages v0.22
 # --- PROCESS EVERY MESSAGE ----------------------------------------------------
@@ -1694,7 +1696,7 @@ for index, key in enumerate(sortedMsgOrderTable):
         htmldata += "<div class='css_message'>"
 
     if outputToText:  # for .txt output
-        if blurring != "":  # For blurring
+        if blurring != "":
             data_email = "_____@_____.__"
         if threaded_message:  # add ">>" to text output to indicate a thread v0.23
             textOutput += convertDate(str(msg['created']), "%A %H:%M      (%b %d, %Y)") + "  >> " + data_email + ": "
@@ -1856,7 +1858,7 @@ returntextDomain += "</table>"
 # ======  MESSAGE & FILE STATISTICS
 tocStats = "<table id='mytoc' style='width: 250px;'>"
 tocStats += f"<tr><td># of messages: </td><td style='text-align:right;'> {len(sortedMsgOrderTable):,} </td></tr>"
-#  ^^^^ 0.26d don't show total msg downloaded but the actual number of msg
+# ^^^^ 0.26d don't show total msg downloaded but the actual number of msg
 if statTotalImages > 0:
     tocStats += f"<tr><td> # images: "
     if downloadFiles in ['no', 'info']:
@@ -1880,7 +1882,7 @@ if statTotalMessages > maxTotalMessages - 10:
 tocStats += "</table>"
 if outputToText:  # for .txt output
     textOutput += f"\n\n\n STATISTICS \n--------------------------\n # of messages : {len(sortedMsgOrderTable):,}\n # of images   : {statTotalImages:,}\n # of files    : {statTotalFiles:,}\n # of mentions : {statTotalMentions:,}\n\n\n"
-    #  ^^^^ 0.26d don't show total msg downloaded but the actual number of msg
+    # ^^^^ 0.26d don't show total msg downloaded but the actual number of msg
 
 
 # ======  HEADER
