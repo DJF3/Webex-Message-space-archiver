@@ -1,6 +1,8 @@
 # Webex Space Archiver 
 
 ***Because of a 'refocus' this repository will no longer be maintained by myself.***  *Many thanks to the kinds words received from the users and the feedback they have been providing over the past years!*
+***UPDATE*** on request I have added a Python script that reads all of your space names and generates an .sh/bat script which runs the archive script for all of your spaces. Instructions are inside the "generate_space_batch.py" file. 
+
 
 Important Release v30!** (check out new features in the [release notes](#releasenotes))
 
@@ -16,7 +18,8 @@ Important Release v30!** (check out new features in the [release notes](#release
 
 [Feedback & Support](#feedback)
 
-[<img src="https://camo.githubusercontent.com/7a785e6fab9f9040fb3739fdc2df1284b3ef199c7450b3d379716b365a37156f/68747470733a2f2f7374617469632e70726f64756374696f6e2e6465766e6574636c6f75642e636f6d2f636f646565786368616e67652f6173736574732f696d616765732f6465766e65742d7075626c69736865642e737667" alt="published" data-canonical-src="https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg" style="max-width: 100%;">](https://developer.cisco.com/codeexchange/github/repo/DJF3/Webex-Teams-Space-Archive-v2/) 
+
+[<img src="https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg" alt="published" data-canonical-src="https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg" style="max-width: 100%;">](https://developer.cisco.com/codeexchange/github/repo/DJF3/Webex-Teams-Space-Archive-v2/) 
 
 Archive Cisco Webex space messages to a single HTML file. NOTE: This code is written for a customer as an example. I specifically wanted 1 (_one_) .py file that did everything. It's not beautiful code but it works :-)
 Feedback? Please go [here](#feedback) and let me know what you think!
