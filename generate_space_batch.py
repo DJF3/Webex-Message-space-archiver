@@ -9,7 +9,7 @@
 #       0. get your Webex dev token: https://developer.webex.com/docs/getting-your-personal-access-token (login)
 #       1. Edit this file:
 #           a. put your ACCESS_TOKEN in this variable _OR_ 
-#              (optional) set the token in an environment variable: (MacOS): set WEBEX_ARCHIVE_TOKEN='TOKENHERE'
+#              (optional) set the token in an environment variable: (MacOS): export WEBEX_ARCHIVE_TOKEN='TOKENHERE'
 #           b. edit variable archive_script if the archive .py file is different than webex-space-archive.py 
 #       2. In a terminal window:         python3 generate_space_batch.py
 #              this will generate a file called "webex-space-archive-ALL.sh" and display the content.
@@ -26,7 +26,7 @@ import sys
 # Replace with your Webex API access token
 ACCESS_TOKEN = "PASTE_YOUR_ACCESS_TOKEN_HERE"
 # archive_script = "webex-space-archive.py"
-archive_script = "webex-space-archive-v30.py"
+archive_script = "webex-space-archive-v31pub.py"
 #_____ below: no changes needed
 
 
@@ -45,7 +45,9 @@ try:
     # Make the GET request
     response = requests.get("https://webexapis.com/v1/rooms?max=1000", headers=HEADERS)
     response.raise_for_status()  # Raise exception for HTTP errors
-    rooms = response.json().get("items", [])
+    # rooms = response.json().get("items", [])
+    # DJ: below rooms is sorted alphabetically (space title). The above rooms does not sort it.
+    rooms = sorted(response.json().get("items", []), key=lambda room: room.get("title", "").lower())
     # Output each room's title and ID
     for room in rooms:
         my_output += f"\n# {count_total}. {room['title']}"
