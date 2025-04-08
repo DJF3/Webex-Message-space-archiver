@@ -7,9 +7,10 @@ All notable changes to this project will be documented in this file.
 
 
 
-## Enhancements in release v25 - February 10th 2022
+## [v25] - 2022-02-10
 
-**Important Enhancements / fixes that may require your attention**
+### Important Enhancements / fixes that may require your attention
+
 - REQUIREMENTS: Python 3.9 - the code will check for this version. I have not tested with older versions.
 - CONFIG: Get TOKEN from _environment variable_ "WEBEX_ARCHIVE_TOKEN" if the .ini does not have a token. Great for batch operations
 - CONFIG: Run script with .ini filename as parameter for batch operations. Store your token in an environment variable
@@ -18,7 +19,8 @@ All notable changes to this project will be documented in this file.
 - BUG: More than 9 messages per thread were not shown in html/txt (tnx ojchase!) 
 - BUG: Shared code on-screen: no wrapping but when printing: wrapping so no content goes lost.
 
-**NEW**
+### Added
+
 - FUNCTIONAL: Table of content: YEARS are now collapsable (one click. Default: expanded)
 - FUNCTIONAL: Create some image/file SIZE stats (total image/file size, avg image/file size)
 - FUNCTIONAL: End script with 2 beeps. (1=attention, 3=error)
@@ -37,7 +39,8 @@ All notable changes to this project will be documented in this file.
 - FILTERING: make the maxtotalmessages dateformat (below) configurable (in script, not the .ini)
 - FILTERING: archive msg BETWEEN 2 dates. maxtotalmessages = 28052021-28062021  (ddmmyyyy) (chriskoch99)
 
-**FIXED**
+### Fixed
+
 - CODE: If a space has NO messages (because of auto-archiving or message age max) error. Now it stops with a message.
 - VISUAL: (ojchase) If last space msg = threaded -> shown as a normal message. Fixed.
 - VISUAL: Message without html but only text? "\n" and "\n\n"'s are ignored. (ojchase) 
@@ -61,23 +64,22 @@ All notable changes to this project will be documented in this file.
 - DOC: wrong url in ini (rooms-get documentation))
 - TEST: Tested file modified date on WINDOWS! Working!
 
-**OPEN**
+### Open
+
 - VISUAL: When retrieving messages between 2 dates, the total-message-count may not be 100% accurate. (only affects a statistic in the header)
 - TIMEZONE: Generated HTML not using DST ("summertime"), to be addressed in an upcoming release
 
-**NOTE**
+### Notes
+
 - CARDS: cards and buttons won't be visible in the html
 - NOTE: The code reads messages with UTC time and displays it in the local timezone without being aware of summer/winter time. In the summer msg times could be off 1 hour.
 
 
 
+## [v21] - 2021-09-02
 
+### Added
 
-
-
-## Enhancements in release v21 - September 2th 2021
-
-**NEW**
 - FILE   - !! downloaded files get the time/date as the message where they were attached to!
 - SEARCH - !! results are split in direct & group spaces (separate bots/users and group spaces)
 - SEARCH - space search has a progress indicator
@@ -91,7 +93,8 @@ All notable changes to this project will be documented in this file.
 - VISUAL - align message count to the right (align all stat counts to the right)
 - VISUAL - changed font to the -Light variant of HelveticaNeue
 
-**FIXED BUGS**
+### Fixed
+
 - LAY-OUT - month msg count, now using class and removed align:right;
 - LAY-OUT - many small changes to increase readability and consistency
 - VISUAL  - "#7 generating HTML" is now showing that this includes downloading of files
@@ -113,9 +116,10 @@ All notable changes to this project will be documented in this file.
 
 
 
-## Enhancements in release v20 - February 11th 2020
+## [v20] - 2020-02-11
 
-**NEW**
+### Added 
+
 - !! MESSAGE THREADING: Supporting message threading !!
 - MESSAGES: Changed message time format so it's easier to read
 - MESSAGES: you can see 'Edited' when a message was modified after sending.
@@ -123,7 +127,8 @@ All notable changes to this project will be documented in this file.
 - LAYOUT: changed left border of threaded message to grey
 - IMAGES: multiple images in 1 message? Now shown as grid, not a list.
 
-**FIXED BUGS**
+### Fixed
+
 - MENTIONS: code would not display "@all" mentions
 - ATTACHMENTS: images with uppercase extensions were not downloaded
 - SORTING: "new->old", all messages considered NEW because current_msg_time - prev_msg_time is never > 60s
@@ -142,17 +147,21 @@ All notable changes to this project will be documented in this file.
 
 
 
-## Enhancements in release v19a - May 27th 2019
-**IMPORTANT**
+## [v19a] - 2019-05-27
+
+### IMPORTANT
+
 - PRINT: A printed (to PDF) version of the generated file looks like the screen    (27may2019-v19a)
          *Firefox* tip: File, Print, check "print background colors and images", then print/save to PDF
          
-**NEW**
+### Added
+
 - STATISTICS: add number of different users who have written messages   (24may2019-v19a)
 - STATISTICS: add total number of members   (24may2019-v19a)
 - ERROR: Avatar download errors are not reported if retries were successful   (22may2019-v19a)
 
-**Fixed bugs**
+### Fixed
+
 - LAYOUT: Header is not resizing with browser width: better lay-out/print    (27may2019-v19a)
 - LAYOUT: TOC + statistics now have a minimum size: better lay-out/print    (27may2019-v19a)
 - PRINT: removed "back to top" arrow from printing    (27may2019-v19a)
@@ -161,8 +170,10 @@ All notable changes to this project will be documented in this file.
 
 
 
-## Enhancements in release v17h-v19 - May 22nd 2019
-**IMPORTANT**
+## Enhancements in release v17h-v19 - 2019-05-22
+
+### IMPORTANT
+
 - TIME: Messages are stored in UTC. Your timezone is detected and time/dates are converted  (v18b9)
 - FILES: HTML files are always stored in a folder.       (v18b)
 - FILES: images/files/avatars are stored in their own folder (/images, /files, /avatars)    (v18b)
@@ -174,7 +185,8 @@ All notable changes to this project will be documented in this file.
 - AVATAR: empty? Show circle with first 2 initials    (v17h)
 - FIND SPACE ID: Find space ID by running the script with a search argument as parameter. (v17h)
 
-**NEW**
+### Added
+
 - TIME: add time-zone detection in script    (v18b9)
 - TIME: add 'generation' time-zone to header    (v18b9)
 - REQUIREMENT: for Python 3.6 or higher is checked (because of print(f"{blah}"))   (v18b8)
@@ -200,7 +212,8 @@ All notable changes to this project will be documented in this file.
 - IMAGES: Decreased space between multiple images in the same message    (v18b3)
 - IMAGES: Image popup: added "escape" key to close the image    (v17h)
 
-**Fixed bugs**
+### Fixed
+
 - CODE: steps appeared twice: #7, #7, #8. NOW have #7, #8, #9   (v19)
 - SEARCH: if you haven't set your space ID, the search function doesn't work!    (v19)
 - DOWNLOAD: could cause a KeyError: 'content-disposition'. Code now deals with this situation.   (v18b9)
@@ -229,3 +242,10 @@ All notable changes to this project will be documented in this file.
 ## Limitations in v19
 * If _HTML code_ is written as TEXT (without marking it as code using  ```), the message may not be displayed or it could mess up the lay-out for remaining messages
 * ~~PRINTing the HTML page to PDF (for example) will mess up lay-out (fixed in v0.19a)~~
+
+
+
+[v25]: #
+[v21]: #
+[v20]: #
+[v19a]: #
