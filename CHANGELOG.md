@@ -12,9 +12,11 @@ All notable changes to this project will be documented in this file.
 ### Important Enhancements / fixes that may require your attention
 
 - REQUIREMENTS: Python 3.9 - the code will check for this version. I have not tested with older versions.
-- CONFIG: Get TOKEN from _environment variable_ "WEBEX_ARCHIVE_TOKEN" if the .ini does not have a token. Great for batch operations
+- CONFIG: Get TOKEN from _environment variable_ "WEBEX_ARCHIVE_TOKEN" if the .ini does not have a token. 
+  Great for batch operations
 - CONFIG: Run script with .ini filename as parameter for batch operations. Store your token in an environment variable
-- REQUEST: NEW! "download=no" ONLY shows the text: "attached_file" without filename/size. Get filename/size? "download=info"
+- REQUEST: NEW! "download=no" ONLY shows the text: "attached_file" without filename/size. 
+  Get filename/size? "download=info"
 - BUG: Messages without a parent only appeared in the JSON file, not in the .txt or .html files.
 - BUG: More than 9 messages per thread were not shown in html/txt (tnx ojchase!) 
 - BUG: Shared code on-screen: no wrapping but when printing: wrapping so no content goes lost.
@@ -58,7 +60,8 @@ All notable changes to this project will be documented in this file.
 - BUG: wrong brackets in javscript code of generated html (for expand/collapse of months)
 - BUG: created parents have a fake user id --> this caused a problem downloading avatars
 - BUG: created parents (that did not exist) were not written to JSON output
-- BUG: New year detection for the month TOC was done by checking for "Jan". Not good for localized setups. Now checking for the month number!
+- BUG: New year detection for the month TOC was done by checking for "Jan". Not good for localized setups. 
+  Now checking for the month number!
 - CONFIG - (ojchase) When 'maxtotalmessages' in .ini < 21: error. Fixed.
 - SEARCH - if no group or direct spaces are found, you still see the header.
 - DOC: wrong url in ini (rooms-get documentation))
@@ -66,13 +69,15 @@ All notable changes to this project will be documented in this file.
 
 ### Open
 
-- VISUAL: When retrieving messages between 2 dates, the total-message-count may not be 100% accurate. (only affects a statistic in the header)
+- VISUAL: When retrieving messages between 2 dates, the total-message-count may not be 100% accurate.
+  (only affects a statistic in the header)
 - TIMEZONE: Generated HTML not using DST ("summertime"), to be addressed in an upcoming release
 
 ### Notes
 
 - CARDS: cards and buttons won't be visible in the html
-- NOTE: The code reads messages with UTC time and displays it in the local timezone without being aware of summer/winter time. In the summer msg times could be off 1 hour.
+- NOTE: The code reads messages with UTC time and displays it in the local timezone without being aware of 
+  summer/winter time. In the summer msg times could be off 1 hour.
 
 
 
@@ -136,7 +141,8 @@ All notable changes to this project will be documented in this file.
 - ATTACHMENTS: 'jpeg' images are now embeded (like png/jpg/etc)
 - ATTACHMENTS: messages without text (only attachments/images) --> files won't download
 - THREADED MESSAGE: with threading, the message order is messed up --> now a msg index is created first
-- THREADED MESSAGE: with a # of messages limit, you could run into messages that belong to a previous thread. --> IGNORE those
+- THREADED MESSAGE: with a # of messages limit, you could run into messages that belong to a previous thread. 
+ --> IGNORE those
 - THREADED MESSAGE: threaded messages + avatars should be indented
 - THREADED MESSAGE: When sorted new-old, threaded messages should be sorted old-new
 - THREADED MESSAGE: crossing a month? --> thread reply in Nov on Thread in Oct: showing new month header. --> FIXED
