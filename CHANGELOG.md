@@ -12,13 +12,13 @@ All notable changes to this project will be documented in this file.
 ### Important Enhancements / fixes that may require your attention
 
 - REQUIREMENTS: Python 3.9 - the code will check for this version. I have not tested with older versions.
-- CONFIG: Get TOKEN from _environment variable_ "WEBEX_ARCHIVE_TOKEN" if the .ini does not have a token. 
+- CONFIG: Get TOKEN from _environment variable_ "WEBEX_ARCHIVE_TOKEN" if the .ini does not have a token.
   Great for batch operations
 - CONFIG: Run script with .ini filename as parameter for batch operations. Store your token in an environment variable
-- REQUEST: NEW! "download=no" ONLY shows the text: "attached_file" without filename/size. 
+- REQUEST: NEW! "download=no" ONLY shows the text: "attached_file" without filename/size.
   Get filename/size? "download=info"
 - BUG: Messages without a parent only appeared in the JSON file, not in the .txt or .html files.
-- BUG: More than 9 messages per thread were not shown in html/txt (tnx ojchase!) 
+- BUG: More than 9 messages per thread were not shown in html/txt (tnx ojchase!)
 - BUG: Shared code on-screen: no wrapping but when printing: wrapping so no content goes lost.
 
 ### Added
@@ -26,7 +26,7 @@ All notable changes to this project will be documented in this file.
 - FUNCTIONAL: Table of content: YEARS are now collapsable (one click. Default: expanded)
 - FUNCTIONAL: Create some image/file SIZE stats (total image/file size, avg image/file size)
 - FUNCTIONAL: End script with 2 beeps. (1=attention, 3=error)
-- VISUAL: "updated" field now showing the updated date/time 
+- VISUAL: "updated" field now showing the updated date/time
 - VISUAL: in top-10 user domains also show the remaining user domain count
 - VISUAL: For txt export, prefix threaded messages in the TXT export with ">> " to visualize the thread
 - VISUAL: Space name (header) wraps if long
@@ -45,22 +45,22 @@ All notable changes to this project will be documented in this file.
 
 - CODE: If a space has NO messages (because of auto-archiving or message age max) error. Now it stops with a message.
 - VISUAL: (ojchase) If last space msg = threaded -> shown as a normal message. Fixed.
-- VISUAL: Message without html but only text? "\n" and "\n\n"'s are ignored. (ojchase) 
+- VISUAL: Message without html but only text? "\n" and "\n\n"'s are ignored. (ojchase)
 - VISUAL: stats: "...other users" showed msg from total of top-10 domain, now it shows the # of non-top10 users.
 - VISUAL: better indication that a card message cannot be displayed.
 - VISUAL: expand icon for year on previous line, now on the same line as the year (display-inline)
 - VISUAL: if you collaps the last year in the TOC, now it doesn't hide the "last message" link
 - VISUAL: if sortoldnew=no, the "last message" link should say "newest message", otherwise "oldest message"
 - VISUAL: index table of first 'year' is wider than the next ones. now they are all 300px
-- VISUAL: with total/avg file size stats, don't round(2) for anything lower than GB 
+- VISUAL: with total/avg file size stats, don't round(2) for anything lower than GB
 - VISUAL: When printing, _long_ strings would not be wrapped: --> 'word-break: break-word;'
 - VISUAL: When a _folder_ is configured in the 'outputFileName': throw error message
 - VISUAL: html code in "text" field was interpreted (changing layout/fonts/colors/etc)
-- BUG: space name with "#", the '#' is removed leaving a space. --> also removing space 
+- BUG: space name with "#", the '#' is removed leaving a space. --> also removing space
 - BUG: wrong brackets in javscript code of generated html (for expand/collapse of months)
 - BUG: created parents have a fake user id --> this caused a problem downloading avatars
 - BUG: created parents (that did not exist) were not written to JSON output
-- BUG: New year detection for the month TOC was done by checking for "Jan". Not good for localized setups. 
+- BUG: New year detection for the month TOC was done by checking for "Jan". Not good for localized setups.
   Now checking for the month number!
 - CONFIG - (ojchase) When 'maxtotalmessages' in .ini < 21: error. Fixed.
 - SEARCH - if no group or direct spaces are found, you still see the header.
@@ -76,7 +76,7 @@ All notable changes to this project will be documented in this file.
 ### Notes
 
 - CARDS: cards and buttons won't be visible in the html
-- NOTE: The code reads messages with UTC time and displays it in the local timezone without being aware of 
+- NOTE: The code reads messages with UTC time and displays it in the local timezone without being aware of
   summer/winter time. In the summer msg times could be off 1 hour.
 
 
@@ -123,7 +123,7 @@ All notable changes to this project will be documented in this file.
 
 ## [v20] - 2020-02-11
 
-### Added 
+### Added
 
 - !! MESSAGE THREADING: Supporting message threading !!
 - MESSAGES: Changed message time format so it's easier to read
@@ -141,7 +141,7 @@ All notable changes to this project will be documented in this file.
 - ATTACHMENTS: 'jpeg' images are now embeded (like png/jpg/etc)
 - ATTACHMENTS: messages without text (only attachments/images) --> files won't download
 - THREADED MESSAGE: with threading, the message order is messed up --> now a msg index is created first
-- THREADED MESSAGE: with a # of messages limit, you could run into messages that belong to a previous thread. 
+- THREADED MESSAGE: with a # of messages limit, you could run into messages that belong to a previous thread.
  --> IGNORE those
 - THREADED MESSAGE: threaded messages + avatars should be indented
 - THREADED MESSAGE: When sorted new-old, threaded messages should be sorted old-new
