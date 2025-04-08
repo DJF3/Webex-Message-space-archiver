@@ -4,12 +4,24 @@ All notable changes to this project will be documented in this file.
 
 
 
+
+## [v31] - 2025-04-08
+
+## Added
+
+- ADDON: list_my_spaces.py, generates .sh file that runs the webex-archive-script for ALL of your spaces
+
+## Fixed
+
+- BUG: URL in msg find error, changed regex to r'regexhere' instead of without the r
+
+
 ## [v30] - 2023-03-19
 
 Enhancements based on user requests:
 Increased output quality and precision, support for DST, privacy blurring, bulk processing.
 
-## Added
+### Added*** 
 
 - NEW: DST dates: support for MANUAL DST date configuration (in .ini file)
 - NEW: DST dates: support for AUTOMATIC (local) DST recognition, displaying message timestamps correctly for
@@ -19,8 +31,9 @@ Increased output quality and precision, support for DST, privacy blurring, bulk 
        Text file output email addresses replaced with "___@__.__". NOTE: JSON output will remain original
        NOTE: if you print the HTML file to PDF, the blurred data turns into images --> unable to get the original names
 - NEW: Batch processing: call script with spaceId or spaceId+.ini file
+- UI: added "expand/collapse all" for years in top navigation
 
-## Changed
+### Changed
 
 - CONFIG: On "token problem" - mention environment variable "WEBEX_ARCHIVE_TOKEN"
 - CONFIG: ini config: 'file download' section allow for the word "image" and "file" (besides "imageS" and "fileS")
@@ -29,8 +42,9 @@ Increased output quality and precision, support for DST, privacy blurring, bulk 
 - VISUAL: HTML header "between 70 and 150 days" --> "between 70-150 days"
 - VISUAL: Textfile output: extra line-break after <File Attachment>
 - VISUAL: DST HTML header: TZ field shows the current TZ name, not both DST and non-DST name
+- CODE: improvement dealing with commandline parameters (starting "if cl_count=" )
 
-## FIXED
+### Fixed
 
 - VISUAL: move @mention css to .atmention class (so it can be included in blurs)
 - VISUAL: TEXT output: no space between the email address and the message text
@@ -48,9 +62,6 @@ Increased output quality and precision, support for DST, privacy blurring, bulk 
 - FIX: Restrict messages between 2 dates failed. Fixed date check.
 - FIX: DST in Australia: dst_start date is in the FALL and dst_stop in spring - now working correctly
 - FIX: DST Utcoffset calculation was wrong for negative UTC offset timezones. fixed.
-
-## NOTE
-- CARDS: cards and buttons won't be visible in the html output
 
 
 ## [v25] - 2022-02-10
@@ -316,6 +327,7 @@ Increased output quality and precision, support for DST, privacy blurring, bulk 
 
 
 
+[v31]: #
 [v30]: #
 [v25]: #
 [v21]: #
