@@ -159,7 +159,7 @@ All notable changes to this project will be documented in this file.
 
 - PRINT: A printed (to PDF) version of the generated file looks like the screen    (27may2019-v19a)
          *Firefox* tip: File, Print, check "print background colors and images", then print/save to PDF
-         
+
 ### Added
 
 - STATISTICS: add number of different users who have written messages   (24may2019-v19a)
@@ -173,10 +173,29 @@ All notable changes to this project will be documented in this file.
 - PRINT: removed "back to top" arrow from printing    (27may2019-v19a)
 - HEADER: 'avatar' setting missing    (27may2019-v19a)
 - BUG: remove "back to top" text from month headers?   (27may2019-v19a)
+- PRINTing the HTML page to PDF (for example) will mess up lay-out
 
 
 
-## Enhancements in release v17h-v19 - 2019-05-22
+## [v19] - 2019-05-22
+
+### Added
+
+- NOTIFY: spaceId not set: explain what they can do: run with search parameter!   (v19)
+
+### Fixed
+
+- CODE: steps appeared twice: #7, #7, #8. NOW have #7, #8, #9   (v19)
+- SEARCH: if you haven't set your space ID, the search function doesn't work!    (v19)
+- HTML: header height wrong (66px) - changed to 76px because of 2nd line with space info    (v19)
+
+### Limitations
+- If _HTML code_ is written as TEXT (without marking it as code using  ```), the message may not be displayed,
+ or it could mess up the lay-out for remaining messages
+
+
+
+## [v18] - Release date unknown
 
 ### IMPORTANT
 
@@ -188,8 +207,6 @@ All notable changes to this project will be documented in this file.
 - OUTPUT: ability to restrict number of messages by nr. of days: '60d' = 60 days  (v18b7)
 - AVATAR: Config item 'useravatar' now has the option 'download' to download avatar images  (v18)
 - AVATAR: download: Only downloads Avatars of the people who actually wrote a message    (v18b7)
-- AVATAR: empty? Show circle with first 2 initials    (v17h)
-- FIND SPACE ID: Find space ID by running the script with a search argument as parameter. (v17h)
 
 ### Added
 
@@ -202,7 +219,6 @@ All notable changes to this project will be documented in this file.
 - PERFORMANCE: report displayed based on variable printPerformanceReport=False in script  (v18b7)
 - NAVIGATE: add floating "back to top" button   (v18b3)
 - STATS: When not downloading files, it will provide stats for files AND images. (v18b3)
-- NOTIFY: spaceId not set: explain what they can do: run with search parameter!   (v19)
 - NOTIFY: When the script is ready, it beeps once    (v18b3)
 - FOLDERS: will be created AFTER messages/members have been retrieved. ERROR? No folders created.   (v18b8)
 - FOLDER: If a folder exists, it will add a number '-01', '-02' instead of '-1', '-2'    (v18b3)
@@ -216,14 +232,10 @@ All notable changes to this project will be documented in this file.
 - ATTACHMENTS: when not downloading files or images, still display the filename & size.     (v18a1)
 - IMAGES: Simplified CSS in code for images    (v18b3)
 - IMAGES: Decreased space between multiple images in the same message    (v18b3)
-- IMAGES: Image popup: added "escape" key to close the image    (v17h)
 
 ### Fixed
 
-- CODE: steps appeared twice: #7, #7, #8. NOW have #7, #8, #9   (v19)
-- SEARCH: if you haven't set your space ID, the search function doesn't work!    (v19)
 - DOWNLOAD: could cause a KeyError: 'content-disposition'. Code now deals with this situation.   (v18b9)
-- HTML: header height wrong (66px) - changed to 76px because of 2nd line with space info    (v19)
 - HTML: code still contained: <spark-mention> tags - they do nothing - removed.   (v18b9)
 - AVATAR: step 4 had a wrong reference to members.personId that should have been members['personId']   (v18b5)
 - AVATAR: Display user avatar+msg when the same user writes a msg >60 seconds after the prev message   (v18b4)
@@ -245,9 +257,16 @@ All notable changes to this project will be documented in this file.
 - NOTIFY: Beep function printed 3 empty lines. fixed with end/flush in print      (v18a2)
 
 
-## Limitations in v19
-* If _HTML code_ is written as TEXT (without marking it as code using  ```), the message may not be displayed or it could mess up the lay-out for remaining messages
-* ~~PRINTing the HTML page to PDF (for example) will mess up lay-out (fixed in v0.19a)~~
+## [v17] - Release date unknown
+
+### IMPORTANT
+
+- AVATAR: empty? Show circle with first 2 initials    (v17h)
+- FIND SPACE ID: Find space ID by running the script with a search argument as parameter. (v17h)
+
+### Added
+
+- IMAGES: Image popup: added "escape" key to close the image    (v17h)
 
 
 
@@ -255,3 +274,6 @@ All notable changes to this project will be documented in this file.
 [v21]: #
 [v20]: #
 [v19a]: #
+[v19]: #
+[v18]: #
+[v17]: #
