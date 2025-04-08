@@ -1,9 +1,11 @@
+# Webex Space Archiver Change Log
+
+All notable changes to this project will be documented in this file.
+
 ## These are OLD releasenotes. 
 **The most recent ones are in the [README.md](https://github.com/DJF3/Webex-Message-space-archiver#releasenotes)**
 
-.
-.
-.
+
 
 ## Enhancements in release v25 - February 10th 2022
 
@@ -227,4 +229,3 @@
 ## Limitations in v19
 * If _HTML code_ is written as TEXT (without marking it as code using  ```), the message may not be displayed or it could mess up the lay-out for remaining messages
 * ~~PRINTing the HTML page to PDF (for example) will mess up lay-out (fixed in v0.19a)~~
-
