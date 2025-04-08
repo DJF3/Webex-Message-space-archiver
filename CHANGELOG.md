@@ -181,13 +181,13 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- NOTIFY: spaceId not set: explain what they can do: run with search parameter!   (v19)
+- NOTIFY: spaceId not set: explain what they can do: run with search parameter!
 
 ### Fixed
 
-- CODE: steps appeared twice: #7, #7, #8. NOW have #7, #8, #9   (v19)
-- SEARCH: if you haven't set your space ID, the search function doesn't work!    (v19)
-- HTML: header height wrong (66px) - changed to 76px because of 2nd line with space info    (v19)
+- CODE: steps appeared twice: #7, #7, #8. NOW have #7, #8, #9
+- SEARCH: if you haven't set your space ID, the search function doesn't work!
+- HTML: header height wrong (66px) - changed to 76px because of 2nd line with space info
 
 ### Limitations
 - If _HTML code_ is written as TEXT (without marking it as code using  ```), the message may not be displayed,
@@ -199,74 +199,74 @@ All notable changes to this project will be documented in this file.
 
 ### IMPORTANT
 
-- TIME: Messages are stored in UTC. Your timezone is detected and time/dates are converted  (v18b9)
-- FILES: HTML files are always stored in a folder.       (v18b)
-- FILES: images/files/avatars are stored in their own folder (/images, /files, /avatars)    (v18b)
-- OUTPUT: export message data as .txt (besides .html & .json)   (v18b8)
-- OUTPUT: export message data as a .json file (default: no)   (v18b2)
-- OUTPUT: ability to restrict number of messages by nr. of days: '60d' = 60 days  (v18b7)
-- AVATAR: Config item 'useravatar' now has the option 'download' to download avatar images  (v18)
-- AVATAR: download: Only downloads Avatars of the people who actually wrote a message    (v18b7)
+- TIME: Messages are stored in UTC. Your timezone is detected and time/dates are converted
+- FILES: HTML files are always stored in a folder.
+- FILES: images/files/avatars are stored in their own folder (/images, /files, /avatars)
+- OUTPUT: export message data as .txt (besides .html & .json)
+- OUTPUT: export message data as a .json file (default: no)
+- OUTPUT: ability to restrict number of messages by nr. of days: '60d' = 60 days
+- AVATAR: Config item 'useravatar' now has the option 'download' to download avatar images
+- AVATAR: download: Only downloads Avatars of the people who actually wrote a message
 
 ### Added
 
-- TIME: add time-zone detection in script    (v18b9)
-- TIME: add 'generation' time-zone to header    (v18b9)
-- REQUIREMENT: for Python 3.6 or higher is checked (because of print(f"{blah}"))   (v18b8)
-- FONT: easier to read: removed: HelveticaNeue-Light/Helvetica Neue Light from CSS    (v18b9)
-- ERROR: print certain errors when the script finishes (toggle: by setting in the script)   (v18b8)
-- PRIVACY: change filename for avatars to userId   (v18b8)
-- PERFORMANCE: report displayed based on variable printPerformanceReport=False in script  (v18b7)
-- NAVIGATE: add floating "back to top" button   (v18b3)
-- STATS: When not downloading files, it will provide stats for files AND images. (v18b3)
-- NOTIFY: When the script is ready, it beeps once    (v18b3)
-- FOLDERS: will be created AFTER messages/members have been retrieved. ERROR? No folders created.   (v18b8)
-- FOLDER: If a folder exists, it will add a number '-01', '-02' instead of '-1', '-2'    (v18b3)
-- INI: .txt and/or .json file: configurable in .ini    (v18b8)
-- INI: Renamed config key 'myroom' to 'myspaceid' - but you can use both     (v18b4)
-- INI: Updated the .ini file lay-out to make it more compact and easier to read.    (v18b3)
-- INI: change downloadfiles key to 'download'      (v18a2)
-- MESSAGE: Removed gray bubble (v18a2)
-- ATTACHMENTS: added base64 encoded paperclip icon (v18a2)
-- ATTACHMENTS: show file size and filename underneath image   (v18a1)
-- ATTACHMENTS: when not downloading files or images, still display the filename & size.     (v18a1)
-- IMAGES: Simplified CSS in code for images    (v18b3)
-- IMAGES: Decreased space between multiple images in the same message    (v18b3)
+- TIME: add time-zone detection in script
+- TIME: add 'generation' time-zone to header
+- REQUIREMENT: for Python 3.6 or higher is checked (because of print(f"{blah}"))
+- FONT: easier to read: removed: HelveticaNeue-Light/Helvetica Neue Light from CSS
+- ERROR: print certain errors when the script finishes (toggle: by setting in the script)
+- PRIVACY: change filename for avatars to userId
+- PERFORMANCE: report displayed based on variable printPerformanceReport=False in script
+- NAVIGATE: add floating "back to top" button
+- STATS: When not downloading files, it will provide stats for files AND images.
+- NOTIFY: When the script is ready, it beeps once
+- FOLDERS: will be created AFTER messages/members have been retrieved. ERROR? No folders created.
+- FOLDER: If a folder exists, it will add a number '-01', '-02' instead of '-1', '-2'
+- INI: .txt and/or .json file: configurable in .ini
+- INI: Renamed config key 'myroom' to 'myspaceid' - but you can use both
+- INI: Updated the .ini file lay-out to make it more compact and easier to read.
+- INI: change downloadfiles key to 'download'
+- MESSAGE: Removed gray bubble
+- ATTACHMENTS: added base64 encoded paperclip icon
+- ATTACHMENTS: show file size and filename underneath image
+- ATTACHMENTS: when not downloading files or images, still display the filename & size.
+- IMAGES: Simplified CSS in code for images
+- IMAGES: Decreased space between multiple images in the same message
 
 ### Fixed
 
-- DOWNLOAD: could cause a KeyError: 'content-disposition'. Code now deals with this situation.   (v18b9)
-- HTML: code still contained: <spark-mention> tags - they do nothing - removed.   (v18b9)
-- AVATAR: step 4 had a wrong reference to members.personId that should have been members['personId']   (v18b5)
-- AVATAR: Display user avatar+msg when the same user writes a msg >60 seconds after the prev message   (v18b4)
-- AVATAR: download: store failed downloads in a list and re-process these items! (try max 3x)   (v18b7)
-- ATTACHMENTS: more than 1 attachment in a single messsage? They are processed twice. Fixed   (v18b9)
-- ATTACHMENTS: 0 byte file: don't download the file, only show the filename/size    (v18b3)
-- EXPORT: set outputjson to "json"-> the outputToText variable is not set.     (v18b9)
-- EXPORT: to .txt file: full of HTML tags for mentions + divs: strip!  (v18b8)
-- HTML: Unnessecary spaces after filename in img link      (v18b)
-- HYPERLINKS: Markdown ('embedded') hyperlinks are not working (no link)    (v18b8)
-- HYPERLINKS: Markdown hyperlinks did not open in a new window:    (v18b8)
-- INI: Outputfilename (when configured in the .ini) is not being used!     (v18b)
-- INI: If maxmessages is not set it will use the default: 1000    (v18b3)
-- IMAGES: If a filename/image contains a colon (':'), the image linking doesn't work     (v18a2)
-- IMAGES: Depending on the size (very wide, very high) images are not resized correctly.      (v18a2)
-- MAX MSG when limiting max messages by days, it would not show at the top of the screen.    (v18b7)
-- MAX MSG maxMessages not displayed in HTML header (setting)   (v18b7)
-- MAX MSG: if you set the max age to 10 days and no messages are <10 days old: error.   (v18b8)
-- NOTIFY: Beep function printed 3 empty lines. fixed with end/flush in print      (v18a2)
+- DOWNLOAD: could cause a KeyError: 'content-disposition'. Code now deals with this situation.
+- HTML: code still contained: <spark-mention> tags - they do nothing - removed.
+- AVATAR: step 4 had a wrong reference to members.personId that should have been members['personId']
+- AVATAR: Display user avatar+msg when the same user writes a msg >60 seconds after the prev message
+- AVATAR: download: store failed downloads in a list and re-process these items! (try max 3x)
+- ATTACHMENTS: more than 1 attachment in a single messsage? They are processed twice. Fixed
+- ATTACHMENTS: 0 byte file: don't download the file, only show the filename/size
+- EXPORT: set outputjson to "json"-> the outputToText variable is not set.
+- EXPORT: to .txt file: full of HTML tags for mentions + divs: strip!
+- HTML: Unnessecary spaces after filename in img link
+- HYPERLINKS: Markdown ('embedded') hyperlinks are not working (no link)
+- HYPERLINKS: Markdown hyperlinks did not open in a new window:
+- INI: Outputfilename (when configured in the .ini) is not being used!
+- INI: If maxmessages is not set it will use the default: 1000
+- IMAGES: If a filename/image contains a colon (':'), the image linking doesn't work
+- IMAGES: Depending on the size (very wide, very high) images are not resized correctly.
+- MAX MSG when limiting max messages by days, it would not show at the top of the screen.
+- MAX MSG maxMessages not displayed in HTML header (setting)
+- MAX MSG: if you set the max age to 10 days and no messages are <10 days old: error.
+- NOTIFY: Beep function printed 3 empty lines. fixed with end/flush in print
 
 
 ## [v17] - Release date unknown
 
 ### IMPORTANT
 
-- AVATAR: empty? Show circle with first 2 initials    (v17h)
-- FIND SPACE ID: Find space ID by running the script with a search argument as parameter. (v17h)
+- AVATAR: empty? Show circle with first 2 initials
+- FIND SPACE ID: Find space ID by running the script with a search argument as parameter.
 
 ### Added
 
-- IMAGES: Image popup: added "escape" key to close the image    (v17h)
+- IMAGES: Image popup: added "escape" key to close the image
 
 
 
