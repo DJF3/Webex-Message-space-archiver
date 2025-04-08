@@ -2,9 +2,55 @@
 
 All notable changes to this project will be documented in this file.
 
-## These are OLD releasenotes. 
-**The most recent ones are in the [README.md](https://github.com/DJF3/Webex-Message-space-archiver#releasenotes)**
 
+
+## [v30] - 2023-03-19
+
+Enhancements based on user requests:
+Increased output quality and precision, support for DST, privacy blurring, bulk processing.
+
+## Added
+
+- NEW: DST dates: support for MANUAL DST date configuration (in .ini file)
+- NEW: DST dates: support for AUTOMATIC (local) DST recognition, displaying message timestamps correctly for
+       summer and winter.
+- NEW: DST dates: added ability to use "L" for "Last" (Sunday) (in situations with 5 sundays in a month, like March 2019)
+- NEW: Blurring: option to (OPTICALLY!) blur email addresses & @mentions in msg content and statistics.
+       Text file output email addresses replaced with "___@__.__". NOTE: JSON output will remain original
+       NOTE: if you print the HTML file to PDF, the blurred data turns into images --> unable to get the original names
+- NEW: Batch processing: call script with spaceId or spaceId+.ini file
+
+## Changed
+
+- CONFIG: On "token problem" - mention environment variable "WEBEX_ARCHIVE_TOKEN"
+- CONFIG: ini config: 'file download' section allow for the word "image" and "file" (besides "imageS" and "fileS")
+- VISUAL: added collaps/expand-all button for months in the header
+- VISUAL: added 'outputjson' and 'dst' settings to the HTML header
+- VISUAL: HTML header "between 70 and 150 days" --> "between 70-150 days"
+- VISUAL: Textfile output: extra line-break after <File Attachment>
+- VISUAL: DST HTML header: TZ field shows the current TZ name, not both DST and non-DST name
+
+## FIXED
+
+- VISUAL: move @mention css to .atmention class (so it can be included in blurs)
+- VISUAL: TEXT output: no space between the email address and the message text
+- VISUAL: HTML header shows "Generate HTML code for 12828 messages" = total count BEFORE limiting by date/days.
+- TEXT output: if msg only has an attachment and NO text or html the script crashes
+- TEXT output: if msg has no text field, no return was added in the txt output
+- TEXT output: now using the "text" field as the basis, not the converted "html" field
+- TEXT output: DST date/time written to TXT file was UTC --> now local timezone OR with DST if configured
+- CONFIG: change dst setting explanation "position" to "week-in-month"
+- CONFIG: text generated in ini file was lowercased. Fixed.
+- FIX: msg with html field but without text showed error on screen --> moved to the end, printing html text
+- FIX: A single thread reply outside the original date-scope should not generate a TOC entry. 
+  (causing slightly less accurate msg count)
+- FIX: missing_parent_msg["text"] has html tags which don't render in the 'text' field. Changed to 'html'
+- FIX: Restrict messages between 2 dates failed. Fixed date check.
+- FIX: DST in Australia: dst_start date is in the FALL and dst_stop in spring - now working correctly
+- FIX: DST Utcoffset calculation was wrong for negative UTC offset timezones. fixed.
+
+## NOTE
+- CARDS: cards and buttons won't be visible in the html output
 
 
 ## [v25] - 2022-02-10
@@ -270,6 +316,7 @@ All notable changes to this project will be documented in this file.
 
 
 
+[v30]: #
 [v25]: #
 [v21]: #
 [v20]: #
