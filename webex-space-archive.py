@@ -757,7 +757,7 @@ def timedifferencedays(msgdate):
 # FUNCTION finds URLs in message text + convert to a hyperlink. Used in HTML generation.
 def convertURL(inputtext):
     outputtext = inputtext
-    urls = re.findall('(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&!:/~+#-]*[\w@?^=%&/~+#-])?', inputtext)
+    urls = re.findall(r'(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&!:/~+#-]*[\w@?^=%&/~+#-])?', inputtext)
     urls = set(urls)
     if len(urls) > 0:
         for replaceThisURL in urls:
