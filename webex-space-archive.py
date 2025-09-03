@@ -965,70 +965,73 @@ def process_Files(fileData, fileDate):
     filelist = list()
     for url in fileData:
         headers = {"Authorization": f"Bearer {myToken}", "Accept-Encoding": ""}
-        r = requests.head(url, headers=headers)
-        if r.status_code == 404:  # Item must have been deleted since url was retrieved
-            continue
-        try:
-            filename = str(r.headers['Content-Disposition']).split("\"")[1]
-            # Files with no name or just spaces: fix so they can still be downloaded:
-            if len(filename) < 1 or filename.isspace():
-                filename = "unknown-filename"
-            if filename == ('+' * (int(len(filename) / len('+')) + 1))[:len(filename)]:
-                filename = "unknown-filename"
-                beep(1)
-                print(f"**process_files** {str(r.headers)}")
-        except Exception as e:
-            filename = "error-getting-filename"
-            myErrorList.append("def process_Files Header 'content-disposition' error for url: " + url)
-        filename = format_filename(filename)
-        filesize = int(r.headers['Content-Length'])
-        fileextension = os.path.splitext(filename)[1][1:].replace("\"", "")
-        filenamepart = os.path.splitext(filename)[0]
-        if int(r.headers['Content-Length']) <= 0:
-            # Not downloading 0 Byte files, only show the filename
-            filelist.append(filename + "###" + str(filesize))
-            continue
-        if downloadFiles not in ['images', 'files', 'image', 'file']:
-            # No file downloading --> just get the filename + size
-            filelist.append(filename + "###" + str(filesize))
-            continue
-        if "image" in downloadFiles and fileextension.lower() not in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif']:
-            # File is not an image --> just get the filename + size
-            filelist.append(filename + "###" + str(filesize))
-            continue
-        if fileextension.lower() in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif']:
-            # File is an image
-            subfolder = "/images/"
-        else:
-            # File is a non-image file
-            subfolder = "/files/"
-        # CHECK if filename exists, if yes, add "-x" where x is a counter
-        if downloadFiles in ['images', 'files', 'image', 'file']:
-            if os.path.isfile(myOutputFolder + subfolder + filename):  # File exist? add '-<number>' to the filename.
-                filepartName = filenamepart
-                filepartExtension = "." + fileextension
-                filepartCounter = 1
-                while os.path.isfile(myOutputFolder + subfolder + filepartName + "-" + str(filepartCounter) + filepartExtension):
-                    filepartCounter += 1
-                filename = filepartName + "-" + str(filepartCounter) + filepartExtension
-        # DOWNLOAD file
-        try:
-            with requests.get(url, headers=headers, stream=True) as r:
-                with open(myOutputFolder + subfolder + filename, 'wb') as f:
-                    shutil.copyfileobj(r.raw, f)
+        # Use only one request object instead of doing separate header/body gets
+        with requests.get(url, headers=headers, stream=True) as resp:
+            if resp.status_code == 404:  # Item must have been deleted since url was retrieved
+                continue
+            try:
+                filename = str(resp.headers['Content-Disposition']).split("\"")[1]
+                # Files with no name or just spaces: fix so they can still be downloaded:
+                if len(filename) < 1 or filename.isspace():
+                    filename = "unknown-filename"
+                if filename == ('+' * (int(len(filename) / len('+')) + 1))[:len(filename)]:
+                    filename = "unknown-filename"
+                    beep(1)
+                    print(f"**process_files** {str(resp.headers)}")
+            except Exception as e:
+                filename = "error-getting-filename"
+                myErrorList.append("def process_Files Header 'content-disposition' error for url: " + url)
+                continue
+            filename = format_filename(filename)
+            # Webex now only uses chunked transfers with no Content-Length - file needs to be pre-downloaded
+            # If certain download options are disabled, filesize will be set to 0
+            fileextension = os.path.splitext(filename)[1][1:].replace("\"", "")
+            filenamepart = os.path.splitext(filename)[0]
+            if downloadFiles not in ['images', 'files', 'image', 'file']:
+                # No file downloading --> just get the filename + size
+                filelist.append(filename + "###" + str(0))
+                continue
+            if "image" in downloadFiles and fileextension.lower() not in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif']:
+                # File is not an image --> just get the filename + size
+                filelist.append(filename + "###" + str(0))
+                continue
+            if fileextension.lower() in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif']:
+                # File is an image
+                subfolder = "/images/"
+            else:
+                # File is a non-image file
+                subfolder = "/files/"
+            # CHECK if filename exists, if yes, add "-x" where x is a counter
+            if downloadFiles in ['images', 'files', 'image', 'file']:
+                if os.path.isfile(myOutputFolder + subfolder + filename):  # File exist? add '-<number>' to the filename.
+                    filepartExtension = "." + fileextension
+                    filepartCounter = 1
+                    while os.path.isfile(myOutputFolder + subfolder + filenamepart + "-" + str(filepartCounter) + filepartExtension):
+                        filepartCounter += 1
+                    filename = filenamepart + "-" + str(filepartCounter) + filepartExtension
+            # DOWNLOAD file
+            try:
+                fileLocation = myOutputFolder + subfolder + filename
+                with open(fileLocation, 'wb') as outFile:
+                    shutil.copyfileobj(resp.raw, outFile)
+                # Checking for 0 length files is only possible after download - don't store these files
+                filesize = os.path.getsize(fileLocation)
+                if filesize <= 0:
+                    os.remove(fileLocation)
+                    filelist.append(filename + "###" + str(0))
+                    continue
                 # Change file modified date
                 try:
-                    fileLocation = myOutputFolder + subfolder + filename
                     dateMSG = datetime.datetime.strptime(fileDate, "%Y-%m-%dT%H:%M:%S.%fZ")
                     modTime = time.mktime(dateMSG.timetuple())
                     os.utime(fileLocation, (modTime, modTime))
                 except Exception as e:
                     myErrorList.append("def process_Files can't change date modified for file: " + filename)
                 filelist.append(filename + "###" + str(filesize))
-        except Exception as e:
-            print(f"----- ERROR:  {e}")
-            myErrorList.append("def process_Files download failed for file: " + filename)
-        print(".", end='', flush=True)  # Progress indicator
+            except Exception as e:
+                print(f"----- ERROR:  {e}")
+                myErrorList.append("def process_Files download failed for file: " + filename)
+            print(".", end='', flush=True)  # Progress indicator
     return filelist
 
 
