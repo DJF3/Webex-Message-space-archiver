@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [v33] - 2026-02-26
+
+## Added
+
+- images now also support avif, heic and webp.
+- added clear screen on script start
+
+## Fixed
+
+- file headers do not have a reliable Content-Length - re-architected and cleaned up
+- space after img src filename. not breaking but fixed anyway
+
+
 ## [v32] - 2026-01-31
 
 ## Fixed
