@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 
 
+## [v32] - 2026-01-31
+
+## Fixed
+
+- some download-stuck problems
 
 
 ## [v31] - 2025-04-08
