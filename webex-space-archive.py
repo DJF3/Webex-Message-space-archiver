@@ -2,7 +2,7 @@
 """Webex Message Space Archive Script.
 Creates a single HTML file with the messages of a Webex Message space
 Info/Requirements/release-notes: https://github.com/DJF3/Webex-Message-space-archiver
-Copyright (c) 2021 Cisco and/or its affiliates.
+Copyright (c) 2026 Cisco and/or its affiliates.
 This software is licensed to you under the terms of the Cisco Sample
 Code License, Version 1.1 (the "License"). You may obtain a copy of the
 License at
@@ -41,14 +41,14 @@ except ImportError:
 #--------- DO NOT CHANGE ANYTHING BELOW ---------
 __author__ = "Dirk-Jan Uittenbogaard"
 __email__ = "dirkjanu@gmail.com"
-__version__ = "0.31b"
-__copyright__ = "Copyright (c) 2025 Cisco and/or its affiliates."
+__version__ = "0.33"
+__copyright__ = "Copyright (c) 2026 DJ Uittenbogaard."
 __license__ = "Cisco Sample Code License, Version 1.1"
 sleepTime = 3
 version = __version__
 printPerformanceReport = False
 printErrorList = True
-max_messages = 500
+max_messages = 400
 currentDate = datetime.datetime.now().strftime("%x %X")
 configFile = "webexspacearchive-config.ini"
 myMemberList = dict()
@@ -68,16 +68,16 @@ def beep(count):  # PLAY SOUND (for errors)
         print(chr(7), end="", flush=True)
     return
 
-
-print(f"\n\n\n========================= START ========================={version}")
+print("\033c", end="")
+print(f"========================= START ========================={version}")
 # First check command line arguments
 cl_args = ' '.join(sys.argv[1:]).strip()
 cl_count = len(sys.argv) - 1
 #___ parameter: nothing - default config file
-#_=0___
+#  param count = 0 ___
 if cl_count == 0:
     print(f"    Using default config file: {configFile}")
-#_=1___
+#  param count = 1 ___
 #___ parameter: space ID
 if cl_count == 1 and "Y2lzY" in cl_args:
     myRoom = cl_args
@@ -90,7 +90,7 @@ elif cl_count == 1 and ".ini" in cl_args:
 elif cl_count == 1:
     mySearch = cl_args
     print(f"    Searching for space containing '{mySearch}'")
-#_>1___
+#  param count > 1 ___
 #___ parameter: Space ID and INI (in no particular order)
 if cl_count > 1 and ".ini" in cl_args:
     if ".ini" in sys.argv[1]:
@@ -967,7 +967,11 @@ def process_Files(fileData, fileDate):
     filelist = list()
     for url in fileData:
         headers = {"Authorization": f"Bearer {myToken}", "Accept-Encoding": ""}
-        r = requests.head(url, headers=headers)
+
+        #----- GET File INFO
+        r =  requests.head(url, headers=headers, allow_redirects=True)
+
+        #----- GET File NAME
         if r.status_code == 404:  # Item must have been deleted since url was retrieved
             continue
         try:
@@ -975,36 +979,28 @@ def process_Files(fileData, fileDate):
             # Files with no name or just spaces: fix so they can still be downloaded:
             if len(filename) < 1 or filename.isspace():
                 filename = "unknown-filename"
-            if filename == ('+' * (int(len(filename) / len('+')) + 1))[:len(filename)]:
-                filename = "unknown-filename"
-                beep(1)
-                print(f"**process_files** {str(r.headers)}")
         except Exception as e:
             filename = "error-getting-filename"
             myErrorList.append("def process_Files Header 'content-disposition' error for url: " + url)
+
         filename = format_filename(filename)
-        filesize = int(r.headers['Content-Length'])
         fileextension = os.path.splitext(filename)[1][1:].replace("\"", "")
         filenamepart = os.path.splitext(filename)[0]
-        if int(r.headers['Content-Length']) <= 0:
-            # Not downloading 0 Byte files, only show the filename
-            filelist.append(filename + "###" + str(filesize))
-            continue
         if downloadFiles not in ['images', 'files', 'image', 'file']:
             # No file downloading --> just get the filename + size
-            filelist.append(filename + "###" + str(filesize))
+            filelist.append(filename + "###0")
             continue
-        if "image" in downloadFiles and fileextension.lower() not in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif']:
+        if "image" in downloadFiles and fileextension.lower() not in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif', "heic", "avif", "webp"]:
             # File is not an image --> just get the filename + size
-            filelist.append(filename + "###" + str(filesize))
+            filelist.append(filename + "###0")
             continue
-        if fileextension.lower() in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif']:
+        if fileextension.lower() in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif', "heic", "avif", "webp"]:
             # File is an image
             subfolder = "/images/"
         else:
             # File is a non-image file
             subfolder = "/files/"
-        # CHECK if filename exists, if yes, add "-x" where x is a counter
+        #----- CHECK if filename exists. YES? add "-x" (counter)
         if downloadFiles in ['images', 'files', 'image', 'file']:
             if os.path.isfile(myOutputFolder + subfolder + filename):  # File exist? add '-<number>' to the filename.
                 filepartName = filenamepart
@@ -1013,24 +1009,68 @@ def process_Files(fileData, fileDate):
                 while os.path.isfile(myOutputFolder + subfolder + filepartName + "-" + str(filepartCounter) + filepartExtension):
                     filepartCounter += 1
                 filename = filepartName + "-" + str(filepartCounter) + filepartExtension
-        # DOWNLOAD file
+
+        #----- DOWNLOAD FILE
+        # **DJ** 2026 enhancement to deal with filedownloads that for whatever reason get stuck: time-out
+        CONNECT_TIMEOUT = 10   # seconds to establish TCP/SSL
+        READ_TIMEOUT    = 30   # seconds with no incoming data before failing
+        CHUNK_SIZE      = 1024 * 1024        # 1 MB
+        file_path = os.path.join(myOutputFolder, subfolder.strip("/\\"), filename)  # "/images/" -> "images"
+        # CREATE folder where it will be saved
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        #_____________ NEW _________________________________
+        filesize = 0
+        got_any = False
         try:
-            with requests.get(url, headers=headers, stream=True) as r:
-                with open(myOutputFolder + subfolder + filename, 'wb') as f:
-                    shutil.copyfileobj(r.raw, f)
-                # Change file modified date
-                try:
-                    fileLocation = myOutputFolder + subfolder + filename
-                    dateMSG = datetime.datetime.strptime(fileDate, "%Y-%m-%dT%H:%M:%S.%fZ")
-                    modTime = time.mktime(dateMSG.timetuple())
-                    os.utime(fileLocation, (modTime, modTime))
-                except Exception as e:
-                    myErrorList.append("def process_Files can't change date modified for file: " + filename)
+            with requests.get(url, headers=headers, stream=True, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT)) as r:
+                r.raise_for_status()
+                with open(file_path, "wb") as f:
+                    for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
+                        if not chunk:
+                            continue
+                        got_any = True
+                        filesize += len(chunk)
+                        f.write(chunk)
+            # 0-byte / no-data check (works even when chunked)
+            if not got_any or filesize == 0:
+                filelist.append(filename + "###0")
+                continue
+            else:
                 filelist.append(filename + "###" + str(filesize))
+            # Change file modified date
+            try:
+                dateMSG = datetime.datetime.strptime(fileDate, "%Y-%m-%dT%H:%M:%S.%fZ")
+                modTime = time.mktime(dateMSG.timetuple())
+                os.utime(file_path, (modTime, modTime))
+            except Exception:
+                myErrorList.append("def process_Files can't change date modified for file: " + filename)
+                print("def process_Files can't change date modified for file: " + filename)
+
+        except requests.exceptions.Timeout as e:
+            myErrorList.append(f"TIMEOUT downloading {filename} (connect/read): {e}")
+            print(f"TIMEOUT downloading {filename} (connect/read): {e}")
+            # optional: remove partial file
+            if os.path.exists(file_path):
+                try: os.remove(file_path)
+                except: pass
+
+        except requests.exceptions.RequestException as e:
+            # includes HTTP errors via raise_for_status, connection errors, etc.
+            myErrorList.append(f"DOWNLOAD failed for {filename}: {e}")
+            print(f"DOWNLOAD failed for {filename}: {e}")
+            if os.path.exists(file_path):
+                try: os.remove(file_path)
+                except: pass
+
         except Exception as e:
-            print(f"----- ERROR:  {e}")
-            myErrorList.append("def process_Files download failed for file: " + filename)
-        print(".", end='', flush=True)  # Progress indicator
+            myErrorList.append(f"Unexpected error for {filename}: {e}")
+            print(f"Unexpected error for {filename}: {e}")
+            if os.path.exists(file_path):
+                try: os.remove(file_path)
+                except: pass
+        print(".", end="", flush=True)  # Progress Bar  # **DJ** 2026
+
     return filelist
 
 
@@ -1458,7 +1498,7 @@ if userAvatar == "link" or userAvatar == "download":
                 userAvatarDict[persondetails['id']] = persondetails['avatar'].replace("~1600", "~80")
             except:
                 print('', end='')
-    print(".", flush=False)
+    print(".", flush=False)  # Progress Indicator
 stopTimer("get avatars", 0)
 
 startTimer()
@@ -1562,10 +1602,9 @@ if outputToText:
         textOutput += "Yes\n"
 
 
-
 # ====== WRITE JSON data to a FILE =============================================
-startTimer()
 #   (optional) Write JSON to a FILE to be used as input (not using the Webex Message APIs)
+startTimer()
 if outputToJson == "yes" or outputToJson == "both" or outputToJson == "json":
     with open(myOutputFolder + "/" + outputFileName + ".json", 'w', encoding='utf-8') as f:
         json.dump(WebexMessages, f)
@@ -1586,7 +1625,7 @@ for index, key in enumerate(sortedMsgOrderTable):
         current_step = int(current_step)
         sys.stdout.write('\r')
         # the exact output you're looking for:
-        sys.stdout.write("          [%-20s] %d%%" % ('=' * current_step, 5 * current_step))
+        sys.stdout.write("          [%-20s] %d%%  |  count: %d" % ('=' * current_step, 5 * current_step, mycounter))
         sys.stdout.flush()
     # find matching message ID in message list
     msg = next(item for item in WebexMessages if item["id"] == msgOrderTable[key])
@@ -1754,7 +1793,7 @@ for index, key in enumerate(sortedMsgOrderTable):
         else:  # download=info/images/files
             myFiles = process_Files(msg['files'], msg['created'])
             # SORT attached files by <files> _then_ <images>
-            myFiles.sort(key=lambda x: x.split("###")[0].split(".")[-1] in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif'])
+            myFiles.sort(key=lambda x: x.split("###")[0].split(".")[-1] in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif', 'heic', 'avif', 'webp'])
             splitFilesImages = ""
             for filename in myFiles:
                 # IMAGE POPUP
@@ -1764,17 +1803,17 @@ for index, key in enumerate(sortedMsgOrderTable):
                 else:
                     filesize_fancy = convert_size(filesize)
                 fileextension = os.path.splitext(filename)[1][1:].lower()
-                if fileextension in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif'] and (downloadFiles in ["images", "files", "image", "file"]):
+                if fileextension in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif', 'heic', 'avif', 'webp'] and (downloadFiles in ["images", "files", "image", "file"]):
                     if splitFilesImages == "":
                         # extra return after all attached files are listed
                         htmldata += "<br>"
                         splitFilesImages = "done"
-                    htmldata += f"<div class='css_created'><img src='images/{filename} ' title='click to zoom' onclick='onClick(this)' class='image-hover-opacity' /><br>{filename}<br><div class='filesize'>{filesize_fancy}</div> </div>"
+                    htmldata += f"<div class='css_created'><img src='images/{filename}' title='click to zoom' onclick='onClick(this)' class='image-hover-opacity' /><br>{filename}<br><div class='filesize'>{filesize_fancy}</div> </div>"
                 elif "file" in downloadFiles:
                     htmldata += f"<br><div id='fileicon'></div><span style='line-height:32px;'><a href='files/{filename}'>{filename}</a>  ({filesize_fancy})</span>"
                 else:
                     htmldata += f"<br><div id='fileicon'></div><span style='line-height:32px;'> {filename}   ({filesize_fancy})</span>"
-                if fileextension in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif']:
+                if fileextension in ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'tif', 'heic', 'avif', 'webp']:
                     statTotalImages += 1
                     statTotalImagesSize += int(filesize)
                 else:
@@ -1858,7 +1897,7 @@ returntextDomain += "</table>"
 # ======  MESSAGE & FILE STATISTICS
 tocStats = "<table id='mytoc' style='width: 250px;'>"
 tocStats += f"<tr><td># of messages: </td><td style='text-align:right;'> {len(sortedMsgOrderTable):,} </td></tr>"
-# ^^^^ 0.26d don't show total msg downloaded but the actual number of msg
+#  ^^^^ 0.26d don't show total msg downloaded but the actual number of msg
 if statTotalImages > 0:
     tocStats += f"<tr><td> # images: "
     if downloadFiles in ['no', 'info']:
@@ -1882,7 +1921,7 @@ if statTotalMessages > maxTotalMessages - 10:
 tocStats += "</table>"
 if outputToText:  # for .txt output
     textOutput += f"\n\n\n STATISTICS \n--------------------------\n # of messages : {len(sortedMsgOrderTable):,}\n # of images   : {statTotalImages:,}\n # of files    : {statTotalFiles:,}\n # of mentions : {statTotalMentions:,}\n\n\n"
-    # ^^^^ 0.26d don't show total msg downloaded but the actual number of msg
+    #  ^^^^ 0.26d don't show total msg downloaded but the actual number of msg
 
 
 # ======  HEADER
