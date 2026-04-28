@@ -35,6 +35,7 @@ if "WEBEX_ARCHIVE_TOKEN" in os.environ:
 
 # Set the headers with your token
 HEADERS = { "Authorization": f"Bearer {ACCESS_TOKEN}", "Content-Type": "application/json" }
+PAGE_SIZE = 1000
 count_total = 0
 count_direct = 0
 count_group = 0
@@ -42,7 +43,7 @@ my_output = ""
 
 try:
     # API endpoint to get first page of rooms
-    url = f"https://webexapis.com/v1/rooms?max=1000"
+    url = f"https://webexapis.com/v1/rooms?max={PAGE_SIZE}"
     rooms = []
 
     while url:
