@@ -18,7 +18,10 @@
 # NOTE: that when the .sh file is executed it will use the standard .ini file for the configuration. (what to download, max files, etc)
 # Tested on Macos 14.6.1 and Python 3.12. 
 # 2025 -  DJ Uittenbogaard
-# 
+#
+
+from datetime import datetime
+
 import requests
 import os
 import sys
@@ -43,6 +46,11 @@ count_group = 0
 my_output = ""
 
 try:
+    # Get user information
+    response = requests.get("https://webexapis.com/v1/people/me", headers=HEADERS)
+    response.raise_for_status()
+    user = response.json()
+
     # API endpoint to get first page of rooms
     url = f"https://webexapis.com/v1/rooms?max={PAGE_SIZE}"
     rooms = []
@@ -80,13 +88,28 @@ for room in rooms:
     else:
         count_group += 1
 
-my_output += f"\n\n"
-my_output += f"\n#   TOTAL  space: {count_total}"
-my_output += f"\n#   Direct space: {count_direct}"
-my_output += f"\n#   Group  space: {count_group}"
+header = """# Webex Space Archive script
+# ==========================
+# Generated on {} for {} ({})
+#
+""".format(
+    datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+    user.get('displayName'),
+    user.get('userName')
+)
+header += f"""# Spaces counts:
+#   TOTAL   {count_total}
+#   Direct  {count_direct}
+#   Group   {count_group}
+"""
+header += "# " + "-" * 50 + "\n"
+
+my_output = header + my_output
 
 # Print output to screen
+print("\n")
 print(my_output)
+
 # Write output to .sh file. Existing files will be overwritten
 with open(extract_script, "w") as file:
     file.write(my_output)
