@@ -26,6 +26,7 @@ import sys
 # Replace with your Webex API access token
 ACCESS_TOKEN = "PASTE_YOUR_ACCESS_TOKEN_HERE"
 archive_script = "webex-space-archive.py"
+extract_script = "webex-space-archive-ALL.sh"
 #_____ below: no changes needed
 
 
@@ -87,5 +88,7 @@ my_output += f"\n#   Group  space: {count_group}"
 # Print output to screen
 print(my_output)
 # Write output to .sh file. Existing files will be overwritten
-with open("webex-space-archive-ALL.sh", "w") as file:
+with open(extract_script, "w") as file:
     file.write(my_output)
+
+print(f"Script saved in '{extract_script}'")
