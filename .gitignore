@@ -4,5 +4,6 @@
 # Config file
 /webexspacearchive-config.ini
 
-# Directories created by the archive script and their contents
+# Files and Directories created by the archive script
+/webex-space-archive-ALL.sh
 /*/
