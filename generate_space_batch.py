@@ -102,16 +102,15 @@ header += f"""# Spaces counts:
 #   Direct  {count_direct}
 #   Group   {count_group}
 """
-header += "# " + "-" * 50 + "\n"
-
-my_output = header + my_output
 
 # Print output to screen
 print("\n")
-print(my_output)
+print(header)
+
+header += "# " + "-" * 50 + "\n"
 
 # Write output to .sh file. Existing files will be overwritten
 with open(extract_script, "w") as file:
-    file.write(my_output)
+    file.write(header + my_output + "\n")
 
 print(f"Script saved in '{extract_script}'")
