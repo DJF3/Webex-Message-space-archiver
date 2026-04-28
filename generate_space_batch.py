@@ -72,9 +72,9 @@ rooms.sort(key=lambda room: room.get("title", "").lower())
 
 # Output each room's title and ID
 for room in rooms:
+    count_total += 1
     my_output += f"\n# {count_total}. {room['title']}"
     my_output += f"\npython3 {archive_script} {room['id']}"
-    count_total += 1
     if room['type'] == "direct":
         count_direct += 1
     else:
