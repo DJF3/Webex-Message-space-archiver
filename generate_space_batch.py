@@ -110,7 +110,7 @@ print(header)
 header += "# " + "-" * 50 + "\n"
 
 # Write output to .sh file. Existing files will be overwritten
-with open(extract_script, "w") as file:
+with open(extract_script, "w", encoding="utf-8") as file:
     file.write(header + my_output + "\n")
 
 print(f"Script saved in '{extract_script}'")
