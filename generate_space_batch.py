@@ -46,7 +46,11 @@ try:
     url = f"https://webexapis.com/v1/rooms?max={PAGE_SIZE}"
     rooms = []
 
+    print("Retrieving rooms")
     while url:
+        # Progress
+        print('.', end='')
+
         # Get the page, raise exception for HTTP errors
         response = requests.get(url, headers=HEADERS)
         response.raise_for_status()
