@@ -35,39 +35,55 @@ if "WEBEX_ARCHIVE_TOKEN" in os.environ:
 
 # Set the headers with your token
 HEADERS = { "Authorization": f"Bearer {ACCESS_TOKEN}", "Content-Type": "application/json" }
+PAGE_SIZE = 1000
 count_total = 0
 count_direct = 0
 count_group = 0
 my_output = ""
 
 try:
-    # Make the GET request
-    response = requests.get("https://webexapis.com/v1/rooms?max=1000", headers=HEADERS)
-    response.raise_for_status()  # Raise exception for HTTP errors
-    # rooms = response.json().get("items", [])
-    # DJ: below rooms is sorted alphabetically (space title). The above rooms does not sort it.
-    rooms = sorted(response.json().get("items", []), key=lambda room: room.get("title", "").lower())
-    # Output each room's title and ID
-    for room in rooms:
-        my_output += f"\n# {count_total}. {room['title']}"
-        my_output += f"\npython3 {archive_script} {room['id']}"
-        count_total += 1
-        if room['type'] == "direct":
-            count_direct += 1
-        else:
-            count_group += 1
+    # API endpoint to get first page of rooms
+    url = f"https://webexapis.com/v1/rooms?max={PAGE_SIZE}"
+    rooms = []
+
+    print("Retrieving rooms")
+    while url:
+        # Progress
+        print('.', end='')
+
+        # Get the page, raise exception for HTTP errors
+        response = requests.get(url, headers=HEADERS)
+        response.raise_for_status()
+
+        # Add retrieved rooms to the results list
+        rooms.extend(response.json().get('items', []))
+
+        # Get next page
+        url = response.links['next']['url'] if 'next' in response.links else None
+
 except requests.exceptions.RequestException as e:
     print(f"# Error fetching rooms: {e}")
     print(my_output)
     sys.exit(1)
 
+# Sort retrieved rooms list alphabetically
+rooms.sort(key=lambda room: room.get("title", "").lower())
+
+# Output each room's title and ID
+for room in rooms:
+    my_output += f"\n# {count_total}. {room['title']}"
+    my_output += f"\npython3 {archive_script} {room['id']}"
+    count_total += 1
+    if room['type'] == "direct":
+        count_direct += 1
+    else:
+        count_group += 1
 
 my_output += f"\n\n"
 my_output += f"\n#   TOTAL  space: {count_total}"
 my_output += f"\n#   Direct space: {count_direct}"
 my_output += f"\n#   Group  space: {count_group}"
-if count_total > 990: 
-    my_output += f"\n# ---> CAREFUL, you may have more than 1000 spaces. This code only generates archive commands for the first 1000 spaces!"
+
 # Print output to screen
 print(my_output)
 # Write output to .sh file. Existing files will be overwritten
