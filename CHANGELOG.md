@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+> [!NOTE]
+> Versions, Release dates and Git Tags before v33 may not accurately
+> reflect the script's real history, since some changes occurred without
+> being committed to GitHub.
+
+
+## [v34] - 2026-05-08
+
+### Added
+
+- Batch: Timestamp when the script was generated
+- Batch: Name of user for whom the batch script has been generated
+
+### Changed
+
+- Batch: Implement pagination (removes limit on 1000 spaces)
+- Batch: Number the rooms from 1 instead of 0
+
+### Removed
+
+- Do not beep when errors occur
+- Clear screen at script start  (messes up batch ouptut)
+
+### Fixed
+
+- Index out of range error when no messages were retrieved
+- AttributeError in get_messages() exception handler
+- Batch: Fix Exception when Room title contains Emoji
+
 
 ## [v33] - 2026-02-26
 
@@ -39,7 +68,7 @@ All notable changes to this project will be documented in this file.
 Enhancements based on user requests:
 Increased output quality and precision, support for DST, privacy blurring, bulk processing.
 
-### Added*** 
+### Added
 
 - NEW: DST dates: support for MANUAL DST date configuration (in .ini file)
 - NEW: DST dates: support for AUTOMATIC (local) DST recognition, displaying message timestamps correctly for
@@ -344,8 +373,10 @@ Increased output quality and precision, support for DST, privacy blurring, bulk 
 - IMAGES: Image popup: added "escape" key to close the image
 
 
-
-[v31]: #
+[v34]: https://github.com/DJF3/Webex-Message-space-archiver/compare/v33...v34
+[v33]: https://github.com/DJF3/Webex-Message-space-archiver/compare/v32...v33
+[v32]: https://github.com/DJF3/Webex-Message-space-archiver/compare/v31...v32
+[v31]: https://github.com/DJF3/Webex-Message-space-archiver/compare/v30...v31
 [v30]: #
 [v25]: #
 [v21]: #
