@@ -63,7 +63,6 @@ mySearch = ""
 maxmsg_format = "%d%m%Y"
 
 
-print("\033c", end="")
 print(f"========================= START ========================={version}")
 # First check command line arguments
 cl_args = ' '.join(sys.argv[1:]).strip()
