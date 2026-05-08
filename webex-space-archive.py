@@ -828,6 +828,9 @@ def get_messages(mytoken, myroom, myMaxMessages):
                 exit()
 
             messages = result.json()["items"]
+            # Abort if no messages were retrieved
+            if not messages:
+                break
             messageCount += len(messages)
             progress_counter += 1
             sys.stdout.write('\r')
