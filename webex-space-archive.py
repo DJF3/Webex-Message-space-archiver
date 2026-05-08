@@ -860,18 +860,22 @@ def get_messages(mytoken, myroom, myMaxMessages):
                 if "Link" in result.headers:   # There ARE more messages but the maxTotalMessages has been reached
                     print(f"          Reached configured maximum # messages ({maxTotalMessages})")
                 break
-        except requests.exceptions.RequestException as e:  # A serious problem, like an SSLError or InvalidURL
-            print(f"          EXCEPT status_code: {e.status_code}")
-            print(f"          EXCEPT text: {e.text}")
-            print(f"          EXCEPT headers: {e.headers}")
-            if e.status_code == 429:
-                print("          Code 429, waiting for : " + str(sleepTime) + " seconds: ", end='', flush=True)
-                for x in range(0, sleepTime):
-                    time.sleep(1)
-                    print(".", end='', flush=True)  # Progress indicator
+        except requests.exceptions.RequestException as e:  # A serious problem, like an SSLError or
+            r = e.response
+            if r is not None:
+                if r.status_code == 429:
+                    print("          Code 429, waiting for : " + str(sleepTime) + " seconds: ", end='', flush=True)
+                    for x in range(0, sleepTime):
+                        time.sleep(1)
+                        print(".", end='', flush=True)  # Progress indicator
+                    continue
+                print(f"          EXCEPT status_code: {r.status_code}")
+                print(f"          EXCEPT text: {r.text}")
+                print(f"          EXCEPT headers: {r.headers}")
             else:
-                print(f"          EXCEPT ELSE e: {e}     e.code: {e.code}")
-                break
+                print(f"          EXCEPT ELSE: {e}")
+            break
+
     if maxTotalMessages == 0:
         print(" **ERROR** there are no messages. Please check your maxMessages setting and try again.\n\n")
         exit()
