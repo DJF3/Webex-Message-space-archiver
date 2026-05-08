@@ -63,11 +63,6 @@ mySearch = ""
 maxmsg_format = "%d%m%Y"
 
 
-def beep(count):  # PLAY SOUND (for errors)
-    for x in range(0, count):
-        print(chr(7), end="", flush=True)
-    return
-
 print("\033c", end="")
 print(f"========================= START ========================={version}")
 # First check command line arguments
@@ -113,7 +108,6 @@ if os.path.isfile("./" + configFile):
         config.read('./' + configFile)
         if config.has_option('Archive Settings', 'downloadfiles'):
             print(" *** NOTE!\n     Please change the key 'downloadfiles' in your .ini file to 'download'\n     or rename your .ini file and run this script to generate a new .ini file\n\n")
-            beep(3)
             downloadFiles = config['Archive Settings']['downloadfiles'].lower().strip()
         else:
             downloadFiles = config['Archive Settings']['download'].lower().strip()
@@ -188,11 +182,9 @@ if os.path.isfile("./" + configFile):
         print("    Check if your .ini file contains the following keys: \n        download, sortoldnew, mytoken, myspaceid, outputfilename, useravatar, maxtotalmessages, outputjson")
         print("    Rename your .ini file, re-run this script (generating correct file)\n    and put your settings in the new .ini file")
         print(" ---------------------------------------\n\n")
-        beep(3)
         exit()
 elif os.path.isfile("./" + configFile.replace("webexspacearchive-config", "webexteamsarchive-config")):
     print(f" **ERROR** OLD config filename found!\n   RENAME 'webexteamsarchive-config.ini' to 'webexspacearchive-config.ini' and retry \n\n")
-    beep(3)
     exit()
 
 else:
@@ -278,7 +270,6 @@ else:
     except Exception as e:  # Error creating config file
         print(" ** ERROR ** creating config file")
         print(f"             Error message: {e}")
-        beep(3)
     print(f"\n\n ------------------------------------------------------------------ \n ** WARNING ** Config file '{configFile}' does not exist.  \n               Creating empty configuration file. \n --> EDIT the configuration in this file and re-run this script.\n ------------------------------------------------------------------\n\n")
     # STOP - the script because you need a valid configuration file first
     exit()
@@ -331,7 +322,6 @@ if mySearch == "":  # NOT searching for space name
     print(f"    download:{downloadFiles}  Max-msg:{maxMessageString}  Avatars:{userAvatar}  DST:{dst_string} {blur_msg}")
 if len(goExitError) > 76:   # length goExitError = 66. If error: it is > 76 characters --> print errors + exit
     print(f"{goExitError}\n ------------------------------------------------------------------\n\n")
-    beep(3)
     exit()
 
 
@@ -836,7 +826,6 @@ def get_messages(mytoken, myroom, myMaxMessages):
 
             if result.status_code != 200 and result.status_code != 429:
                 print(f" ** ERROR ** Problem retrieving specific messages. Try to lower\n                the max_messages variable in the .py and .ini file until it works\nERROR msg: {result.text}\nERROR code: {result.status_code}")
-                beep(3)
                 exit()
             messageCount += len(result.json()["items"])
             progress_counter += 1
@@ -881,7 +870,6 @@ def get_messages(mytoken, myroom, myMaxMessages):
                 break
     if maxTotalMessages == 0:
         print(" **ERROR** there are no messages. Please check your maxMessages setting and try again.\n\n")
-        beep(3)
         exit()
     return resultjsonmessages[0:maxTotalMessages]
 
@@ -908,22 +896,18 @@ def get_roomname(mytoken, myroom):
             print("       Go here to get a new token:")
             print("       https://developer.webex.com/docs/api/getting-started")
             print("_________________________ STOPPED _______________________\n\n\n")
-            beep(3)
             exit()
         elif result.status_code == 404:  # and "resource could not be found" in str(result.text) --> WRONG SPACE ID
             print("       **ERROR** Check if the Space ID in your .ini file is correct.\n         Find the Space ID? Run this script with the space name as parameter!")
             print("_________________________ STOPPED _______________________\n\n\n")
-            beep(3)
             exit()
         elif result.status_code != 200:
             print(f"       **ERROR** Unknown Error occurred. status code: {result.status_code}\n       Info: \n {result.text}\n\n")
-            beep(3)
             exit()
         elif result.status_code == 200:
             returndata = result.json()['title']
     except Exception as e:
         print(f"       **ERROR** #1 get_roomname API call status_code: {result.status_code}\n status_text: {result.text}\n Exception {e}\n\n")
-        beep(3)
         exit()
     return str(returndata.strip())
 
@@ -937,7 +921,6 @@ def get_me(mytoken):
         result = requests.get(url='https://webexapis.com/v1/people/me', headers=header)
     except Exception as e:
         print(f"       **ERROR** get_me API call status_code: {result.status_code}\n status_text: {result.text}\n Exception {e}\n\n")
-        beep(3)
         exit()
     return result.json()
 
@@ -1155,7 +1138,6 @@ def get_searchspaces(mytoken, searchstring):
                 print("           Go here to get a new token:")
                 print("           https://developer.webex.com/docs/api/getting-started")
                 print("    ------------------------- STOPPED ----------------------- \n\n\n")
-                beep(3)
                 exit()
             if "Link" in result.headers:  # there's MORE members
                 headerLink = result.headers["Link"]
@@ -1165,14 +1147,12 @@ def get_searchspaces(mytoken, searchstring):
                     try:
                         resultjson += result.json()["items"]
                     except Exception as e:
-                        beep(1)
                         print(" **ERROR** get_searchspaces Link: " + str(e))
                 continue
             else:
                 try:
                     resultjson += result.json()["items"]
                 except Exception as e:
-                    beep(1)
                     print(f" **ERROR** get_searchspaces no Link: {e}")
                 print(f" Total number of spaces: {len(resultjson)}")
                 break
@@ -1396,7 +1376,6 @@ try:
 except Exception as e:
     print(" #1 --- get SPACE NAME: **ERROR** getting space name")
     print(f"             Error message: {e}\n\n")
-    beep(3)
     exit()
 stopTimer("get space name", 0)
 # If no outputFileName has been configured: use the space name
@@ -1413,12 +1392,10 @@ try:
 except Exception as e:
     print(" **ERROR** STEP #2: getting Messages")
     print(f"             Error message: {e}\n\n")
-    beep(3)
     exit()
 if len(WebexMessages) == 0:  # for spaces that have no messages (anymore)
     print(" **ERROR** STEP #2: getting Messages")
     print(f"             No messages found\n\n")
-    beep(3)
     exit()
 stopTimer("get messages", 0)
 
@@ -1449,7 +1426,6 @@ try:
 except Exception as e:
     print(" **ERROR** STEP #3: getting Memberlist (email address)")
     print(f"             Error message: {e}")
-    beep(1)
 stopTimer("get memberlist", 0)
 
 
@@ -1648,7 +1624,6 @@ for index, key in enumerate(sortedMsgOrderTable):
     # --- continue processing messages
     if len(msg) < 5:
         print("_EMPTYmessage_")
-        beep(1)  # troubleshooting thing (to see, eh, hear how many "empty messages" are found)
         continue        # message empty
 
     data_text = ""
@@ -1679,7 +1654,6 @@ for index, key in enumerate(sortedMsgOrderTable):
     if data_text == "" and 'files' not in msg and 'mentionedPeople' not in msg:
         # empty text without mentions or attached images/files: SKIP
         print("_EMPTYmessage_")
-        beep(1)  # troubleshooting thing (to see, eh, hear how many "empty messages" are found)
         continue
     try:  # Put email & name in variable
         data_email = str(msg['personEmail'])
@@ -2009,6 +1983,5 @@ if len(myErrorList) > 0 and printErrorList:
         print(f" > {myerrors}")
 
 print(" _______________________ ready ________________________\n\n")
-beep(1)
 
 # ------------------------------- end of code -------------------------------
