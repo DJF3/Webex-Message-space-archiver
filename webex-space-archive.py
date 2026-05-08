@@ -826,17 +826,19 @@ def get_messages(mytoken, myroom, myMaxMessages):
             if result.status_code != 200 and result.status_code != 429:
                 print(f" ** ERROR ** Problem retrieving specific messages. Try to lower\n                the max_messages variable in the .py and .ini file until it works\nERROR msg: {result.text}\nERROR code: {result.status_code}")
                 exit()
-            messageCount += len(result.json()["items"])
+
+            messages = result.json()["items"]
+            messageCount += len(messages)
             progress_counter += 1
             sys.stdout.write('\r')
             sys.stdout.write("          %d %s " % (messageCount, '*' * progress_counter))
             sys.stdout.flush()
             if "Link" in result.headers and messageCount < maxTotalMessages:  # there's MORE messages
-                resultjsonmessages = resultjsonmessages + result.json()["items"]
+                resultjsonmessages = resultjsonmessages + messages
                 # When retrieving multiple batches _check_ if the last message retrieved
                 #      is _OLDER_ than the configured max msg age (in the .ini). If yes: trim results to the max age.
                 if msgMaxAge != 0:
-                    msgAge = timedifferencedays(result.json()["items"][-1]["created"])
+                    msgAge = timedifferencedays(messages[-1]["created"])
                     if msgAge > msgMaxAge:
                         print("          max messages reached (>" + str(msgMaxAge) + " days old)")
                         # NOW I set maxTotalMessages to the last msg index that should be included, based on msg age in days.
@@ -846,9 +848,9 @@ def get_messages(mytoken, myroom, myMaxMessages):
                 payload = {'roomId': myroom, 'max': myMaxMessages, 'beforeMessage': myBeforeMessage}
                 continue
             else:
-                resultjsonmessages = resultjsonmessages + result.json()["items"]
+                resultjsonmessages = resultjsonmessages + messages
                 if msgMaxAge != 0:
-                    msgAge = timedifferencedays(result.json()["items"][-1]["created"])
+                    msgAge = timedifferencedays(messages[-1]["created"])
                     lastMsgLocation = next((index for (index, d) in enumerate(resultjsonmessages) if timedifferencedays(d["created"]) > msgMaxAge), 99999)
                     maxTotalMessages = lastMsgLocation
                 print(f" FINISHED total messages: {messageCount}")
