@@ -175,7 +175,7 @@ Options:
 ---
 ### User Avatar
 
-```
+```ini
 useravatar = link
 ```
 
@@ -191,7 +191,7 @@ Options:
 ---
 ### Limit number of Messages
 
-```
+```ini
 maxtotalmessages = 5000
 ```
 
@@ -209,7 +209,7 @@ Some spaces contain 100,000 messages and you may not want to archive all of them
 ---
 ### Output File Name
 
-```
+```ini
 outputfilename = yourfilename.html
 ```
 
@@ -218,7 +218,8 @@ If EMPTY, the filename will be the same as the Archived Space name (recommended)
 
 ---
 ### Sorting of archived messages.
-```
+
+```ini
 sortoldnew = yes
 ```
 
@@ -229,7 +230,7 @@ Options:
 ---
 ### Output JSON
 
-```
+```ini
 outputjson = no
 ```
 
@@ -244,7 +245,7 @@ Options:
 ---
 ### Daylight Savings settings
 
-```
+```ini
 dst_start = L,7,3  ; (last Sunday of March)
 dst_stop = L,7,10  ; (last Sunday of October)
 ```
@@ -261,7 +262,7 @@ Options:
 ---
 ### Blurring
 
-```
+```ini
 blurring = yes
 ```
 
