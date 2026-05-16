@@ -133,7 +133,7 @@ Alternatively, you can store your token in an environment variable:
   * Windows: ```set WEBEX_ARCHIVE_TOKEN=YOUR_TOKEN_HERE```
   * Mac/Linux: ```export WEBEX_ARCHIVE_TOKEN='YOUR_TOKEN_HERE'```
 
-> [WARNING]:
+> [!WARNING]
 > The token is only valid for 12 hours. 
 > After that, you will need to generate a new one (just repeat the steps).
 
