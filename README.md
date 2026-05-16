@@ -3,7 +3,7 @@
 Archives the messages of a Cisco Webex space to a single HTML file. 
 
 > [!WARNING]
-> This repository is no longer actively maintained.
+> This repository is semi actively maintained.
 
 Many thanks for the kinds words received from the users and the feedback they have been providing over the past years!
 
