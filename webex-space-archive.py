@@ -1,12 +1,21 @@
 # -*- coding: utf-8 -*-
-"""Webex Message Space Archive Script.
-Creates a single HTML file with the messages of a Webex Message space
-Info/Requirements/release-notes: https://github.com/DJF3/Webex-Message-space-archiver
-Copyright (c) 2026 Cisco and/or its affiliates.
+"""
+Webex Message Space Archive Script.
+
+Creates a single HTML file with the messages of a Webex Message space.
+
+Project home: https://github.com/DJF3/Webex-Message-space-archiver
+
+Copyright (c) 2020 Cisco and/or its affiliates
+Copyright (c) 2024 Dirk-Jan Uittenbogaard
+Copyright (c) 2026 Dirk-Jan Uittenbogaard, Damien Regad
+
 This software is licensed to you under the terms of the Cisco Sample
 Code License, Version 1.1 (the "License"). You may obtain a copy of the
 License at
+
                https://developer.cisco.com/docs/licenses
+
 All use of the material herein must be in accordance with the terms of
 the License. All rights not expressly granted by the License are
 reserved. Unless required by applicable law or agreed to separately in
@@ -14,6 +23,7 @@ writing, software distributed under the License is distributed on an "AS
 IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 or implied.
 """
+
 import json
 import datetime
 import calendar  # for DST support
@@ -46,8 +56,6 @@ except ImportError:
 __author__ = "Dirk-Jan Uittenbogaard"
 __email__ = "dirkjanu@gmail.com"
 __version__ = "0.35"
-__copyright__ = "Copyright (c) 2026 DJ Uittenbogaard."
-__license__ = "Cisco Sample Code License, Version 1.1"
 sleepTime = 3
 version = __version__
 printPerformanceReport = False

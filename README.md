@@ -1,6 +1,16 @@
 # Webex Space Archiver 
 
-Archives the messages of a Cisco Webex space to a single HTML file. 
+Archives the messages from Cisco Webex spaces.
+
+Copyright (c) 2020 Cisco and/or its affiliates  
+Copyright (c) 2024 Dirk-Jan Uittenbogaard  
+Copyright (c) 2026 Dirk-Jan Uittenbogaard, Damien Regad
+
+The original script (webex-space-archive.py) is released under the
+[Cisco Sample Code License](LICENSE.md#cisco-sample-code-license).
+
+The [MIT License](LICENSE.md#mit-license) applies to newer work (2024 and later).
+
 
 > [!WARNING]
 > This repository is semi actively maintained.

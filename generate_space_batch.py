@@ -1,24 +1,34 @@
-# GOAL: this code creates an .sh file which allows you to run the Webex Space Archive script
-#       for ALL of your spaces.
-# version: 0.1
-# Space archive script:     https://github.com/DJF3/Webex-Message-space-archiver/
-# How to run it? 
-#       0. install python requests ("pip3 install requests")
-#       0. check python version "python3 -V" - should be 3.10 or above
-#       0. download 'webex-space-archive.py' from the github url above.
-#       0. get your Webex dev token: https://developer.webex.com/docs/getting-your-personal-access-token (login)
-#       1. Edit this file:
-#           a. put your ACCESS_TOKEN in this variable _OR_ 
-#              (optional) set the token in an environment variable: (MacOS): export WEBEX_ARCHIVE_TOKEN='TOKENHERE'
-#           b. edit variable archive_script if the archive .py file is different than webex-space-archive.py 
-#       2. In a terminal window:         python3 generate_space_batch.py
-#              this will generate a file called "webex-space-archive-ALL.sh" and display the content.
-#       3. (optional) Edit the generated .sh script to remove spaces you don't want archived.
-#       3. Execute the generated script: sh webex-space-archive-ALL.sh
-# NOTE: that when the .sh file is executed it will use the standard .ini file for the configuration. (what to download, max files, etc)
-# Tested on Macos 14.6.1 and Python 3.12. 
-# 2025 -  DJ Uittenbogaard
-#
+"""
+Webex Message Space Archive Script.
+
+This helper script generates an .sh file which allows you to run the Archive
+script for ALL of your spaces. When the .sh file is executed, the configuration
+(what to download, max files, etc) will be retrieved from the standard .ini file.
+
+Project home: https://github.com/DJF3/Webex-Message-space-archiver
+
+Copyright (c) 2025 Dirk-Jan Uittenbogaard
+
+Released under the MIT License.
+
+Usage:
+  0. install python requests ("pip3 install requests")
+  0. check python version "python3 -V" - should be 3.10 or above
+  0. download 'webex-space-archive.py' from the github url above.
+  0. get your Webex dev token: https://developer.webex.com/docs/getting-your-personal-access-token (login)
+  1. Edit this file:
+     a. put your ACCESS_TOKEN in this variable
+        _OR_
+        set the token in the WEBEX_ARCHIVE_TOKEN environment variable:
+            export WEBEX_ARCHIVE_TOKEN='TOKENHERE' (MacOS / Linux)
+            set WEBEX_ARCHIVE_TOKEN='TOKENHERE' (Windows)
+     b. edit variable archive_script if the archive .py file is different than webex-space-archive.py
+ 2. In a terminal window, run:
+          python3 generate_space_batch.py
+    this will generate a file called "webex-space-archive-ALL.sh" and display the content.
+ 3. Edit the generated .sh script to remove spaces you don't want archived.
+ 4. Execute the generated script: sh webex-space-archive-ALL.sh
+"""
 
 from datetime import datetime
 
